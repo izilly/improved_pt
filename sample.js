@@ -1068,7 +1068,7 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 				$(".post:not(:hidden):even").removeClass("even").addClass("odd");
 				$(".post:not(:hidden):odd").removeClass("odd").addClass("even");
 				if (scrollSet != "false") {
-					$(".post_body_container").css("max-height", "none");
+					$('.post_body_container').css('cssText', $('.post_body_container').css('cssText') + 'max-height: none !important');
 				}
 			}
 		
