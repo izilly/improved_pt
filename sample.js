@@ -820,17 +820,32 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 }
 	// End April Fools Day
 
-	var bandsObj = {"phish": 1}, i, ii, iii, posts, postsrefs, userData, tempUserData, postBody, tableBody, showSet, colorSet, quotesSet, videoSet, setScroll, reloadTopic, mythreads, mt, lastele, originalColor, overlap;
+	var bandsObj = {"phish": 1}, i, ii, iii, bands, posts, postsrefs, userData, tempUserData, postBody, tableBody, showSet, colorSet, quotesSet, videoSet, setScroll, reloadTopic, mythreads, mt, lastele, originalColor, overlap;
 			$(document).ready(function() {
-				var tCMT = setTimeout("checkMT()", 2000);
-				var tASD = setTimeout("addScrollDown()", 2000);
-				var tAPT = setTimeout("addPrintThread()", 2500);
+				getBands();
 			});
+
+			function getBands() {
+				$.get("https://www.phantasytour.com/api/bands", function(data) {
+					bands = data;
+					//createPrintPage();
+					var tCMT = setTimeout("checkMT()", 2000);
+					var tASD = setTimeout("addScrollDown()", 2000);
+					var tAPT = setTimeout("addPrintThread()", 2500);
+				});
+			}
+
+			function getBandApiUrlByWebUrl(bands, webUrl) {
+				var band = bands.filter(function (obj) {
+					return obj.webUrl == webUrl;
+				});
+				return band[0]["url"];
+			}
 
 			function checkMT() {
 				var topic = $("#post-listing .topic_title").text();
 				var mt = false;
-				$.get("https://www.phantasytour.com/api/bands/" + bandsObj[location.pathname.split('/')[2]] + "/mythreads?skip=0&pageSize=40", function(data) {
+				$.get("https://www.phantasytour.com" + getBandApiUrlByWebUrl(bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/mythreads?skip=0&pageSize=40", function(data) {
 					mythreads = data.aaData;
 					for (var i=0; i < mythreads.length; i+=1) {
 						if (mythreads[i]["Subject"] === topic) {
@@ -907,7 +922,7 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 				$("#printThread").live("click", function (e) {
 					e.preventDefault();
 
-					$.get("https://www.phantasytour.com/api/bands/" + bandsObj[location.pathname.split('/')[2]] + "/threads/" + location.pathname.split('/')[4] + "/posts?limit=499&skip=0", function(data) {
+					$.get("https://www.phantasytour.com" + getBandApiUrlByWebUrl(bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/threads/" + location.pathname.split('/')[4] + "/posts?limit=499&skip=0", function(data) {
 						posts = data.data;
 						postsrefs = data.references;
 						createPrintPage();
