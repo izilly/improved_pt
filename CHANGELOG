@@ -1,3 +1,6 @@
+1.9.8.7
+Enabled Bump, DIAF, KYS, Nam quick-post buttons
+
 1.9.8.6
 Fix for broken AJAX post and reload feature
 Added basic support for embedding GIFV files

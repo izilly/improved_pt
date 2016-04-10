@@ -794,27 +794,12 @@ var date = new Date();
 if (date.getDate() === 1 && date.getMonth() === 3) {
 	document.title = 'Drug Band Message Board';
 	$(function() {
-		$(".topic_header .require_logged_in").after('<span class="usr_tools"><a href="#" id="bump" title="Bump">Bump</a><a href="#" id="diaf" title="DIAF">DIAF</a><a href="#" id="kys" title="KYS">KYS</a><a href="#" id="nam" title="NAM">Nam</a></span>');
 		$(".poster_name a").each(function() {
 			var name = $(this).text();
 			if (!name.match(/^.*420.*$/))
 				$(this).html(name+420);
 			else
 				$(this).html(name+" (I really have 420 in my name)");
-		});
-
-		$("#kys, #diaf, #nam").live("click", function() {
-				var text = $(this).html();
-				if (text === 'Nam')
-					text = 'http://i.imgur.com/znUlc.jpg';
-				$("#post_body").html(text);
-				$.post("https://" + window.location.host + window.location.pathname, $("#new_post").serialize(), function(data) {
-					mt = true;
-					$("#post_body").val("");
-					$("#post_submit").val("Post Reply").removeAttr("disabled");
-					afterAjax();
-				});
-			//});
 		});
 	});
 }
@@ -831,6 +816,7 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 					//createPrintPage();
 					var tCMT = setTimeout("checkMT()", 2000);
 					var tASD = setTimeout("addScrollDown()", 2000);
+                    var tABT = setTimeout("addBumpThread()", 2500);
 					var tAPT = setTimeout("addPrintThread()", 2500);
 				});
 			}
@@ -930,17 +916,21 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 				});
 			}
 
-			$("#bump").live("click", function () {
-				//$.get("http://www.phishvids.com/bump.php", function(data) {
-					$("#new_post textarea").html("Bump");
-					$.post("https://" + window.location.host + window.location.pathname, $("#new_post").serialize(), function(data) {
-						mt = true;
-						$("#new_post textarea").val("");
-						$('button[data-bind*="click: postReply"]').text("Post Reply").removeAttr("disabled");
-						afterAjax();
-					});
-				//});
-			});
+            function addBumpThread() {
+                $(".topic_header .mod_tools > span a#scrollDown").before('<a href="#" id="bumpThread" title="Bump">Bump</a><a href="#" id="diaf" title="DIAF">DIAF</a><a href="#" id="kys" title="KYS">KYS</a><a href="#" id="nam" title="NAM">Nam</a></span>');
+    			$("#bumpThread, #diaf, #kys, #nam").live("click", function () {
+    				var text = $(this).html();
+                    if (text === 'Nam')
+                        text = 'https://i.imgur.com/znUlc.jpg';
+                    $("#new_post textarea").html(text);
+                    $.post("https://www.phantasytour.com" + getBandApiUrlByWebUrl(bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/posts", {"Body": $("#new_post textarea").val(), "ThreadId": location.pathname.split('/')[4]}, function(data) {
+                        mt = true;
+                        $("#new_post textarea").val("");
+                        $('button.btn.btn-primary').val("Post Reply").removeAttr("disabled");
+                        afterAjax();
+                    });
+    			});
+            }
 		
 			$("#bottom-pagination-container div + div > a:last").prev('a').attr("onclick", "").click(function() {
 				$('html, body').animate({
