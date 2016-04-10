@@ -1,3 +1,7 @@
+1.9.8.6
+Fix for broken AJAX post and reload feature
+Added basic support for embedding GIFV files
+
 1.9.8.5
 Fix for broken "Disable scroll in posts?" feature
 

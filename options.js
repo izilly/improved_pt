@@ -124,7 +124,8 @@ function restore_options() {
   	}
   }
   if (!colored) {
-  	select2.color.fromString("0000FF");
+  	var select2 = document.getElementById("color");
+    select2.color.fromString("0000FF");
   }
   else {
   	var select2 = document.getElementById("color");
