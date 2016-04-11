@@ -922,7 +922,7 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
     				var text = $(this).html();
                     if (text === 'Nam')
                         text = 'https://i.imgur.com/znUlc.jpg';
-                    $("#new_post textarea").html(text);
+                    $("#new_post textarea").val(text);
                     $.post("https://www.phantasytour.com" + getBandApiUrlByWebUrl(bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/posts", {"Body": $("#new_post textarea").val(), "ThreadId": location.pathname.split('/')[4]}, function(data) {
                         mt = true;
                         $("#new_post textarea").val("");
