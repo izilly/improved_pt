@@ -813,11 +813,17 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 			function getBands() {
 				$.get("https://www.phantasytour.com/api/bands", function(data) {
 					bands = data;
+
+					$.get("https://www.phantasytour.com" + getBandApiUrlByWebUrl(bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/threads/" + location.pathname.split('/')[4] + "/posts?limit=499&skip=0", function(data) {
+						posts = data.data;
+						postsrefs = data.references;
+					});
 					//createPrintPage();
 					var tCMT = setTimeout("checkMT()", 2000);
 					var tASD = setTimeout("addScrollDown()", 2000);
 					var tABT = setTimeout("addBumpThread()", 2500);
 					var tAPT = setTimeout("addPrintThread()", 2500);
+					var tEQO = setTimeout("enableQuoteOverride()", 2500);
 				});
 			}
 
@@ -826,6 +832,29 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 					return obj.webUrl == webUrl;
 				});
 				return band[0]["url"];
+			}
+
+			function getPostBodyById(posts, postId) {
+				var post = posts.filter(function (obj) {
+					return obj.id == postId;
+				});
+				return post[0]["body"];
+			}
+
+			function enableQuoteOverride() {
+				$('a[href="#reply"]').unbind('click').live('click', function (e) {
+					e.preventDefault();
+					var postId = $(this).closest('.post_tools').find('a[href^="/PhantasyMail/"]').attr('href').replace(/\D/g,'');
+					//console.log(postId);
+					var userName = $(this).closest('.post_header').find('.poster_name a').text();
+					$.get("https://www.phantasytour.com" + getBandApiUrlByWebUrl(bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/threads/" + location.pathname.split('/')[4] + "/posts?limit=499&skip=0", function(data) {
+						posts = data.data;
+						postsrefs = data.references;
+						var quotedPostBody = getPostBodyById(posts, postId);
+						var quotedQuotedPostBody = '[quote=' + userName + ']' + quotedPostBody + '[/quote]';
+					$('#new_post textarea').val(quotedQuotedPostBody);
+					});
+				});
 			}
 
 			function checkMT() {
