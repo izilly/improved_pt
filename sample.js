@@ -823,6 +823,9 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 					var tASD = setTimeout("addScrollDown()", 2000);
 					var tABT = setTimeout("addBumpThread()", 2500);
 					var tAPT = setTimeout("addPrintThread()", 2500);
+					var tABT = setTimeout("addBoldText()", 2500);
+					var tABT = setTimeout("addItalicText()", 2500);
+					var tABT = setTimeout("addBoldItalicText()", 2500);
 					var tEQO = setTimeout("enableQuoteOverride()", 2500);
 				});
 			}
@@ -942,6 +945,47 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 						postsrefs = data.references;
 						createPrintPage();
 					});
+				});
+			}
+			
+			
+			
+			function addBoldText() {
+				$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text </a> | ');
+				
+				$("#boldText").live("click", function (e) {
+					e.preventDefault();
+					el = $('#new_post textarea')[0];
+					if (el.setSelectionRange) {
+					el.value = el.value.substring(0,el.selectionStart) + "[b]" + el.value.substring(el.selectionStart,el.selectionEnd) + "[/b]" + el.value.substring(el.selectionEnd,el.value.length);
+					};
+				
+				});
+			}
+			
+			function addItalicText() {
+				$('#new_post textarea').after('<a href="#" id="italicText" title="Italic Text">Italic Selected Text </a> | ');
+				
+				$("#italicText").live("click", function (e) {
+					e.preventDefault();
+					el = $('#new_post textarea')[0];
+					if (el.setSelectionRange) {
+					el.value = el.value.substring(0,el.selectionStart) + "[i]" + el.value.substring(el.selectionStart,el.selectionEnd) + "[/i]" + el.value.substring(el.selectionEnd,el.value.length);
+					};
+				
+				});
+			}
+			
+			function addBoldItalicText() {
+				$('#new_post textarea').after('<a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text </a> | ');
+				
+				$("#boldItalicText").live("click", function (e) {
+					e.preventDefault();
+					el = $('#new_post textarea')[0];
+					if (el.setSelectionRange) {
+					el.value = el.value.substring(0,el.selectionStart) + "[b][i]" + el.value.substring(el.selectionStart,el.selectionEnd) + "[/i][/b]" + el.value.substring(el.selectionEnd,el.value.length);
+					};
+				
 				});
 			}
 
