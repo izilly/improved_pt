@@ -21,6 +21,6 @@
    "options_page": "options.html",
    "permissions": ["http://*.phantasytour.com/*", "https://*.phantasytour.com/*", "contextMenus", "tabs"],
    "update_url": "http://clients2.google.com/service/update2/crx",
-   "version": "1.9.9.3",
+   "version": "1.9.9.4",
    "manifest_version": 2
 }

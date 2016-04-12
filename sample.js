@@ -847,7 +847,7 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 					var tABT = setTimeout("addBoldText()", 2500);
 					var tAIT = setTimeout("addItalicText()", 2500);
 					var tABIT = setTimeout("addBoldItalicText()", 2500);
-					var tALNK = setTimeout("addLink()", 2500);
+					var tALNK = setTimeout("addLinkBuilder()", 2500);
 					var tEQO = setTimeout("enableQuoteOverride()", 2500);
 				});
 			}
@@ -955,7 +955,7 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 					date = new Date(posts[iii]["dateCreated"]);
 					dateCreated = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
 
-					postBody = XBBCODE.process({text: posts[iii]["body"], removeMisalignedTags: false, addInLineBreaks: false});
+					postBody = XBBCODE.process({text: posts[iii]["body"], removeMisalignedTags: false, addInLineBreaks: true});
 
 					tableBody += '<tr id="post' + posts[iii]["id"] + '"><td class="ptdata"><span>' + filteredpostsrefs[0]["username"] + '</span><br>' + dateCreated + '</td><td class="ptpost">' + postBody.html + '</td></tr>';
 				}
@@ -978,8 +978,7 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 			}
 
 			function addBoldText() {
-				$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text </a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text </a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text </a> <br><br> Link URL <br /><input id="ptlinkurl" type="text" style="width:499px"/><br />' + 'Link Text<br /><input id="ptlinktext" type="text" style="width:499px"/>' + '<br /><br />Bold <input id="ptlinkbold" type="checkbox" />' + '     Italic <input id="ptlinkitalic" type="checkbox" />' + '<br /><a href="#" id="linkText" title="Add Link">Insert Link </a><br><br>');
-				
+				$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
 				$(document).on("click", "#boldText", function (e) {
 					e.preventDefault();
 					el = $('#new_post textarea')[0];
@@ -1008,18 +1007,39 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 					};
 				});
 			}
+
+			function addLinkBuilder() {
+				var linkFormElements = '<div class="form-group"><label for="ptlinkurl">Link URL</label><input id="ptlinkurl" type="text" class="form-control"></div><div class="form-group"><label for="ptlinktext">Link Text</label><input id="ptlinktext" type="text" class="form-control"></div><div class="checkbox" style="float:left;vertical-align:top;margin-top:0;margin-right:15px;"><label><input id="ptlinkbold" type="checkbox">Bold</label></div><div class="checkbox"style="float:left;vertical-align:top;margin-top:0;margin-right:15px;"><label><input id="ptlinkitalic" type="checkbox">Italic</label></div><br>';
+				$(document).on("click", "#createLink", function (e) {
+					e.preventDefault();
+					BootstrapDialog.show({
+						title: 'Create a Link',
+						message: linkFormElements,
+						buttons: [{
+							label: 'Insert Link',
+							action: function (dialogRef) {
+								addLink();
+								dialogRef.close();
+							}
+						},
+						{
+							label: 'Close',
+							action: function (dialogRef) {
+								dialogRef.close();
+							}
+						}]
+					});
+				});
+			}
 			
 			function addLink() {
-				$(document).on("click", "#linkText", function (e) {
-					e.preventDefault();
 					el = $('#new_post textarea')[0];
-					tte = '[a href="' + document.getElementById('ptlinkurl').value + '"]' + " " + document.getElementById('ptlinktext').value + " [/a]";
+					tte = '[a href="' + document.getElementById('ptlinkurl').value + '"]' + document.getElementById('ptlinktext').value + '[/a]';
 					if (document.getElementById('ptlinkitalic').checked) { tte = "[i]" + tte + "[/i]";};
 					if (document.getElementById('ptlinkbold').checked) { tte = "[b]" + tte + "[/b]";};
 					el.value += tte;
 					document.getElementById('ptlinkurl').value = "";
 					document.getElementById('ptlinktext').value = "";
-				});
 			}
 
 			function addBumpThread() {
@@ -1272,7 +1292,7 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 						$(this).val("Previewing...").attr('disabled', 'disabled');
 						$("#errorExplanation").remove();
 						if (checkOc($("#new_post textarea").val(), "quote") > 8) {
-		
+
 							$("#applicationHost").after('<div class="errorExplanation" id="errorExplanation"><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>You cannot have more than 4 quotes.</li></ul></div>');
 							$('#previewReplyBtn').val("Preview").removeAttr("disabled");
 							return false;
@@ -1287,19 +1307,19 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 						//var app = require('durandal/app');
 						//app.showMessage($("#new_post textarea").val(), "Your thoughts...", ["Close"], !0, {style:{width:"800px",height:"400px"}});
 						var message = $("#new_post textarea").val();
-						var messageBody = XBBCODE.process({text: message, removeMisalignedTags: false, addInLineBreaks: false});
+						var messageBody = XBBCODE.process({text: message, removeMisalignedTags: false, addInLineBreaks: true});
 						BootstrapDialog.show({
-						    title: 'Your thoughts...',
-						    message: messageBody.html,
-						    onhide: function (dialogRef) {
-						    	$('#previewReplyBtn').val("Preview").removeAttr("disabled");
-						    },
-						    buttons: [{
-						        label: 'Close',
-						        action: function (dialogRef) {
-						            dialogRef.close();
-						        }
-						    }]
+							title: 'Your thoughts...',
+							message: messageBody.html,
+							onhide: function (dialogRef) {
+								$('#previewReplyBtn').val("Preview").removeAttr("disabled");
+							},
+							buttons: [{
+								label: 'Close',
+								action: function (dialogRef) {
+									dialogRef.close();
+								}
+							}]
 						});
 					});
 				}

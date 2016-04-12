@@ -1,3 +1,7 @@
+1.9.9.4
+Modified link-builder tool to appear in pop-up
+Enabled preserving line breaks in HTML output (Print and Preview)
+
 1.9.9.3
 Merged nolxiii's formatting tools: addBoldText(), addItalicText(), addBoldItalicText(), addLink()
 
