@@ -1,3 +1,9 @@
+1.9.9.3
+Merged nolxiii's formatting tools: addBoldText(), addItalicText(), addBoldItalicText(), addLink()
+
+1.9.9.1
+Fix for buggy preview functionality
+
 1.9.9.0
 Fix for buggy quote functionality
 

@@ -32,7 +32,7 @@ chrome.extension.sendRequest({
 }, function (response) {
 	firstSet = response.setFirst;
 	if (firstSet == "true") {
-		$(".topic_subject a").live("click", function() {
+		$(document).on("click", ".topic_subject a", function() {
 			$(this).attr("href", $(this).attr("href").split('#')[0] +"#page/1");
 		});
 	}
