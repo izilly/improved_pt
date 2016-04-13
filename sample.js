@@ -1249,7 +1249,7 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 				lastele = $(this);
 			});
 		
-			chrome.extension.sendRequest({
+			chrome.runtime.sendMessage({
 				set: "show"
 			}, function(response) {
 				showSet = response.setShow;
@@ -1329,7 +1329,7 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 				replaceLinks();
 			});
 		
-			chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+			chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 				if (request.run === "replaceLinks") {
 					var videoset2 = videoSet;
 					var showset2 = showSet;

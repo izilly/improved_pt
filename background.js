@@ -1,4 +1,4 @@
-chrome.extension.onRequest.addListener(
+chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
 	if (request.set === "show")
 	  sendResponse({setShow: localStorage["show"], setColor: localStorage["color"], setVideo: localStorage["video"], setQuotes: localStorage["quotes"], setReload: localStorage["reload"], setScroll: localStorage["scroll"]});
@@ -22,19 +22,19 @@ var contextMenu = chrome.contextMenus.create({"title": "Close All Links",
 
 function send() {
 	chrome.tabs.getSelected(null, function(tab) {
-	  chrome.tabs.sendRequest(tab.id, {run: "replaceLinks"}, function(response) {
+	  chrome.tabs.sendMessage(tab.id, {run: "replaceLinks"}, function(response) {
 	  });
 	});
 }
 function close() {
 	chrome.tabs.getSelected(null, function(tab) {
-	  chrome.tabs.sendRequest(tab.id, {run: "close"}, function(response) {
+	  chrome.tabs.sendMessage(tab.id, {run: "close"}, function(response) {
 	  });
 	});
 }
 function closeAll() {
 	chrome.tabs.getSelected(null, function(tab) {
-	  chrome.tabs.sendRequest(tab.id, {run: "closeAll"}, function(response) {
+	  chrome.tabs.sendMessage(tab.id, {run: "closeAll"}, function(response) {
 	  });
 	});
 }
