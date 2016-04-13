@@ -4,7 +4,7 @@
    },
    "content_scripts": [{
       "css": ["bootstrap-dialog.min.css"],
-      "js": ["jquery.js", "bootstrap.min.js", "sample.js"],
+      "js": ["jquery.js", "bootstrap.min.js", "bootstrap-dialog.min.js", "xbbcode.js", "sample.js"],
       "matches": ["http://*.phantasytour.com/bands/*/threads/*/*", "https://*.phantasytour.com/bands/*/*threads/*/*"]
    }, {
       "js": ["jquery.js", "index.js"],
@@ -21,6 +21,6 @@
    "options_page": "options.html",
    "permissions": ["http://*.phantasytour.com/*", "https://*.phantasytour.com/*", "contextMenus", "tabs"],
    "update_url": "http://clients2.google.com/service/update2/crx",
-   "version": "1.9.9.4",
+   "version": "1.9.9.6",
    "manifest_version": 2
 }
