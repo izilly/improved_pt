@@ -82,6 +82,14 @@ var improvedPT = {};
 	improvedPT.filterForThreadSubject = function (obj) {
 		return obj.type === "Thread";
 	};
+	improvedPT.createTabForPrint = function (htmlCode) {
+		chrome.extension.sendRequest({
+			set: "print",
+			html: htmlCode
+		}, function(response) {
+			//console.log(response.tab);
+		});
+	};
 	improvedPT.createPrintPage = function () {
 		var tableBody = '', tableHead = '', postBody = '', filteredpostsrefs, date, dateCreated, i;
 		for (i = 0; i < improvedPT.posts.length; i += 1) {
@@ -98,8 +106,10 @@ var improvedPT = {};
 
 			tableBody += '<tr id="post' + improvedPT.posts[i].id + '"><td class="ptdata"><span>' + filteredpostsrefs[0].username + '</span><br>' + dateCreated + '</td><td class="ptpost">' + postBody.html + '</td></tr>';
 		}
-		var opened = window.open('');
-		opened.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>My title</title><style type="text/css">blockquote{border:1px solid rgba(221,221,221,.5);padding:3px;margin:6px 15px;}th{font-weight:normal;}td.ptdata,th.pthead{font-size:11px;vertical-align:top;}th.pthead{text-align:left;}td.ptdata{text-align:right;width:150px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}td.ptdata span,th.pthead span{font-size:12px;font-weight:bold;}td.ptpost{vertical-align:top;font-size:12px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}</style></head><body><table><thead>' + tableHead + '</thead><tbody>' + tableBody + '</tbody></table></body></html>');
+		//var opened = window.open('');
+		//opened.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>My title</title><style type="text/css">blockquote{border:1px solid rgba(221,221,221,.5);padding:3px;margin:6px 15px;}th{font-weight:normal;}td.ptdata,th.pthead{font-size:11px;vertical-align:top;}th.pthead{text-align:left;}td.ptdata{text-align:right;width:150px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}td.ptdata span,th.pthead span{font-size:12px;font-weight:bold;}td.ptpost{vertical-align:top;font-size:12px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}</style></head><body><table><thead>' + tableHead + '</thead><tbody>' + tableBody + '</tbody></table></body></html>');
+		var htmlCode = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>My title</title><style type="text/css">blockquote{border:1px solid rgba(221,221,221,.5);padding:3px;margin:6px 15px;}th{font-weight:normal;}td.ptdata,th.pthead{font-size:11px;vertical-align:top;}th.pthead{text-align:left;}td.ptdata{text-align:right;width:150px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}td.ptdata span,th.pthead span{font-size:12px;font-weight:bold;}td.ptpost{vertical-align:top;font-size:12px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}</style></head><body><table><thead>' + tableHead + '</thead><tbody>' + tableBody + '</tbody></table></body></html>';
+		improvedPT.createTabForPrint(htmlCode);
 	};
 	improvedPT.addPrintThread = function () {
 		$(".topic_header .mod_tools > span a#scrollDown").after('<a href="#" id="printThread" title="Print Thread">Print</a>');
