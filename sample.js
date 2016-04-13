@@ -161,7 +161,7 @@ var improvedPT = {};
 				buttons: [{
 					label: 'Insert Link',
 					action: function (dialogRef) {
-						addLink();
+						improvedPT.addLink();
 						dialogRef.close();
 					}
 				},
