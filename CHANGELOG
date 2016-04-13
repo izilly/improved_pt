@@ -1,0 +1,138 @@
+1.9.9.4
+Modified link-builder tool to appear in pop-up
+Enabled preserving line breaks in HTML output (Print and Preview)
+
+1.9.9.3
+Merged nolxiii's formatting tools: addBoldText(), addItalicText(), addBoldItalicText(), addLink()
+
+1.9.9.1
+Fix for buggy preview functionality
+
+1.9.9.0
+Fix for buggy quote functionality
+
+1.9.8.9
+Attempt fix for manifest loading error
+
+1.9.8.8
+Bug fix for quick-post buttons
+
+1.9.8.7
+Enabled Bump, DIAF, KYS, Nam quick-post buttons
+
+1.9.8.6
+Fix for broken AJAX post and reload feature
+Added basic support for embedding GIFV files
+
+1.9.8.5
+Fix for broken "Disable scroll in posts?" feature
+
+1.9.8.4
+Fix for allowing extension to work for bands other than Phish
+
+1.9.8.3
+Added basic Print Thread feature
+
+1.9.8.2
+Added several hacky fixes so that some functionality works again
+
+1.9.7
+Bump button
+Fixed youtube bugs
+If more than 10 youtube videos per page, don't load them
+
+1.9.6
+Fixed bug which caused topics to be reloaded to YouTube
+
+1.9.5
+Fixed bug, working with Steveb to fix other bugs that we're having because of the new PT server
+After dynamic posting/loading new posts, date overlays will not work (for now, working w/ steveb to fix the issue)
+
+1.9.4
+Fixes all Page 1 click bugs (even though I've said that like 17 times) 
+Breaks a few cosmetic things that you probably won't even notice (coloring of topics), but those will be fixed in the next update 
+Some other stuff I did yesterday, but I forget what it was ;)
+
+1.9.1
+Disable scroll bar in posts (enabled by default, can change in options)
+Fixed a bug where when load first page is enabled and you select another page of topics or refresh the topic list it wouldn't go to the first page
+
+1.9
+Fixed a lot of Dynamic bugs
+-Loading of overlapped posts
+-Hiding ignored posts
+-Hover over setlists
+-Assorted bug fixes
+Both Show all Links and Hide all Links are always shown (otherwise things get too messy and buggy and there's no proper solution)
+Any bugs associated with 'Open First Page of Thread' should be fixed
+Options updated
+-Revert settings
+There's more that I'm forgetting, but that sounds like enough for now.
+Assorted bug/efficiency fixes
+
+1.8
+Right Click to close Picture
+Right Click to close all Pictures + Videos (only after selecting right clicking to select load all)
+Bug Fixes
+
+1.7
+Vimeo links are now supported
+Error Checking on Dynamic Posts (too many quotes, too little characters)
+If you only put one character, the extension will beat the system for you and let the one character go through (PT forces 2 minimum characters). If you put zero, it will give an error.
+Assorted Bug Fixes
+
+1.6
+Topic List Page now colors threads properly even with ignored threads (see 1.4.1)
+Setting added to open first page of thread instead of last (defaults to last)
+
+1.5.2
+Improved MT button
+Click on the MT button and if successful, a check will appear
+If a thread is already in "My Threads" a check will already be there
+
+1.5.1
+Fixed small Dynamic Posting bug
+
+1.5
+Dynamic Posting (When you post, it will load all new posts along with your posts immediately in the same page. You can disable this in your settings and it will send you back to the homepage after posts)
+Improved "Latest Posts" (The Latest Posts was always buggy and annoying, but now it should work perfectly and faster than before)
+
+1.4.2
+Minor bug fixes
+
+1.4.1
+Recolors posts so they have the correct colors even if one is hidden due to the "ignore" feature
+
+1.4
+Added Settings:
+Show Videos on load/click
+Show pictures/videos inside of quotes automatically
+
+1.3.1 
+Youtu.be short links are now recognized and should load (please let me know if there are any bugs)
+
+1.3
+Right click to open all images on the page (hidden if set to Show on Load)
+Notice: If you change your settings from Show on Load to Show on Click you might have to open a new window for the context menu to appear the first time)
+
+1.2.1
+Minor bug fix
+
+1.2
+Youtube videos now appear embedded in page
+
+1.1
+Choose whether or not to show images on load or on click (defaults to click to avoid angry girlfriends)
+Choose the color of image links (defaults to blue)
+(Change these in the options page)
+Other minimal bug fixes
+
+1.0
+Finds all links to images on PT and shows them in the page.
+Only loads when viewing a topic in order to minimize any possible lag.
+If a picture is inside of a quote it will not be loaded to avoid redundancy.
+Maximum width in order to fit inside post.
+Click on image to open in new window.
+Some images may not work (not direct links)
+If image is auto-linked then the link is hidden
+If image is "clickable text" then the text is turned to black to avoid confusion
