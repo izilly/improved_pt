@@ -840,15 +840,44 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 						postsrefs = data.references;
 					});
 					//createPrintPage();
-					var tCMT = setTimeout("checkMT()", 2000);
-					var tASD = setTimeout("addScrollDown()", 2000);
-					var tABT = setTimeout("addBumpThread()", 2500);
-					var tAPT = setTimeout("addPrintThread()", 2500);
-					var tABT = setTimeout("addBoldText()", 2500);
-					var tAIT = setTimeout("addItalicText()", 2500);
-					var tABIT = setTimeout("addBoldItalicText()", 2500);
-					var tALNK = setTimeout("addLinkBuilder()", 2500);
-					var tEQO = setTimeout("enableQuoteOverride()", 2500);
+					var tCMT = setTimeout(
+						function() { checkMT(); },
+						2000
+					);
+
+					var tASD = setTimeout(
+						function() { addScrollDown(); },
+						2000
+					);
+					var tABT = setTimeout(
+						function() { addBumpThread(); },
+						2500
+					);
+					var tAPT = setTimeout(
+						function() { addPrintThread(); },
+						2500
+					);
+					var tABT = setTimeout(
+						function() { addBoldText(); },
+						2500
+					);
+					var tAIT = setTimeout(
+						function() { addItalicText(); },
+						2500
+					);
+					var tABIT = setTimeout(
+						function() { addBoldItalicText(); },
+						2500
+					);
+					var tALNK = setTimeout(
+						function() { addLinkBuilder(); },
+						2500
+					);
+					var tEQO = setTimeout(
+						function() { enableQuoteOverride(); },
+						2500
+					);
+
 				});
 			}
 
@@ -909,7 +938,10 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 			var num;
 			$(document).on("mouseup", "ul.pagination li a, button.load-more-button", function() {
 				num = $(".post").length;
-				var t = setTimeout("checkLoad()", 3500);
+				var t = setTimeout(
+					function() { checkLoad(); },
+					3500
+				);
 		
 			});
 		
@@ -920,7 +952,10 @@ if (date.getDate() === 1 && date.getMonth() === 3) {
 
 			$(document).ajaxComplete(function() {
 				num = $(".post").length;
-				var t = setTimeout("checkLoad()", 3500);
+				var t = setTimeout(
+					function() { checkLoad(); },
+					3500
+				);
 			});
 
 			function addScrollDown() {
