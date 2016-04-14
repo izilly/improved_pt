@@ -1,40 +1,46 @@
-chrome.runtime.onMessage.addListener(
+chrome.extension.onRequest.addListener(
   function(request, sender, sendResponse) {
 	if (request.set === "show")
-	  sendResponse({setShow: localStorage["show"], setColor: localStorage["color"], setVideo: localStorage["video"], setQuotes: localStorage["quotes"], setReload: localStorage["reload"], setScroll: localStorage["scroll"]});
+	  sendResponse({setShow: localStorage["show"], setColor: localStorage["color"], setVideo: localStorage["video"], setQuotes: localStorage["quotes"], setReload: localStorage["reload"], setScroll: localStorage["scroll"], setSfw: localStorage["sfw"]});
 	else if (request.set === "index")
-		sendResponse({setFirst: localStorage["first"]});
+		sendResponse({setFirst: localStorage["first"], setSfw: localStorage["sfw"]});
 	else
 	  sendResponse({}); // snub them.
   });
 if (localStorage["show"] !== "load") {
-	var contextMenu = chrome.contextMenus.create({"title": "Open All Links", 
-									 "contexts": ["page","selection","link","editable","audio","video"],
-									 "onclick": send});
+	var contextMenu = chrome.contextMenus.create({
+		"title": "Open All Links",
+		"contexts": ["page","selection","link","editable","audio","video"],
+		"onclick": send
+	});
 }
-var closeMenu = chrome.contextMenus.create({"title": "Close Image",
-								"contexts": ["image"],
-								"onclick": close}); 
+var closeMenu = chrome.contextMenus.create({
+	"title": "Close Image",
+	"contexts": ["image"],
+	"onclick": close
+}); 
 
-var contextMenu = chrome.contextMenus.create({"title": "Close All Links", 
-								 "contexts": ["page","selection","link","editable","audio","video"],
-								 "onclick": closeAll});
+var contextMenu = chrome.contextMenus.create({
+	"title": "Close All Links",
+	"contexts": ["page","selection","link","editable","audio","video"],
+	"onclick": closeAll
+});
 
 function send() {
 	chrome.tabs.getSelected(null, function(tab) {
-	  chrome.tabs.sendMessage(tab.id, {run: "replaceLinks"}, function(response) {
+	  chrome.tabs.sendRequest(tab.id, {run: "replaceLinks"}, function(response) {
 	  });
 	});
 }
 function close() {
 	chrome.tabs.getSelected(null, function(tab) {
-	  chrome.tabs.sendMessage(tab.id, {run: "close"}, function(response) {
+	  chrome.tabs.sendRequest(tab.id, {run: "close"}, function(response) {
 	  });
 	});
 }
 function closeAll() {
 	chrome.tabs.getSelected(null, function(tab) {
-	  chrome.tabs.sendMessage(tab.id, {run: "closeAll"}, function(response) {
+	  chrome.tabs.sendRequest(tab.id, {run: "closeAll"}, function(response) {
 	  });
 	});
 }

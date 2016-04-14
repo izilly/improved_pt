@@ -1,5 +1,8 @@
-1.9.9.5 (2016.04.13)
-add Firefox support
+1.9.9.6
+Linting, refactoring
+
+1.9.9.5
+Added preliminary SFW (Safe For Work) Mode
 
 1.9.9.4
 Modified link-builder tool to appear in pop-up

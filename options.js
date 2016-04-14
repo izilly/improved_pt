@@ -21,6 +21,9 @@ function save_options() {
 	var selectS = document.getElementById("scroll");
 	var optionS = selectS.children[selectS.selectedIndex].value;
 	localStorage["scroll"] = optionS;
+	var selectSFW = document.getElementById("sfw");
+	var optionSFW = selectSFW.children[selectSFW.selectedIndex].value;
+	localStorage["sfw"] = optionSFW;
 
 	// Update status to let user know options were saved.
 	var status = document.getElementById("status");
@@ -51,6 +54,7 @@ function restore_options() {
 	var reloaded = localStorage["reload"];
 	var firsted = localStorage["first"];
 	var scrolled = localStorage["scroll"];
+	var sfwed = localStorage["sfw"];
 	if (!favorite) {
 	}
 	else {
@@ -118,6 +122,18 @@ function restore_options() {
 		for (var i = 0; i < select.children.length; i++) {
 			var child = select.children[i];
 			if (child.value == scrolled) {
+				child.selected = "true";
+				break;
+			}
+		}
+	}
+	if (!sfwed) {
+	}
+	else {
+		var select = document.getElementById("sfw");
+		for (var i = 0; i < select.children.length; i++) {
+			var child = select.children[i];
+			if (child.value == sfwed) {
 				child.selected = "true";
 				break;
 			}
