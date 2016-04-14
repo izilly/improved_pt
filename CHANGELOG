@@ -1,3 +1,6 @@
+1.9.9.8
+Implemented printing using chrome.tabs.create
+
 1.9.9.7
 Added new options_ui functionality
 

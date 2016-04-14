@@ -21,6 +21,11 @@ chrome.extension.onRequest.addListener(
 			function(items) {
 				sendResponse({setFirst: items.first, setSfw: items.sfw});
 			});
+		} else if (request.set === "print") {
+			var url = "data:text/html," + encodeURIComponent(request.html);
+			chrome.tabs.create({url: url}, function (tab) {
+				sendResponse({tab: tab});
+			});
 		} else {
 			sendResponse({}); // snub them.
 		}
