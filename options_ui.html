@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PT'd Settings</title>
+		<style>
+		body: {padding: 10px;}
+		.form-group label{display: inline-block; width: 65%; vertical-align: middle;}
+		.form-group label span{font-size: 11px;}
+		.form-group .form-control{margin-left: 15px; min-height: 28px; line-height: 28px;}
+		.form-group select.form-control{width: 104px;}
+		.form-group input.form-control{width: 104px; padding-top: 0; padding-bottom: 0;}
+		#status {display: inline-block;}
+		</style>
+	</head>
+	<body>
+		<div class="form-group">
+		<label>When to show Images:</label>
+			<select id="show" class="form-control">
+				<option value="click">Show on Click</option>
+				<option value="load">Show on Load</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label>When to show Videos:</label>
+			<select id="video" class="form-control">
+				<option value="vload">Show on Load</option>
+				<option value="vclick">Show on Click</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label>Auto Show Images and Videos in Quotes?<span>(only if Show on Load is enabled respectively)</span></label>
+			<select id="quotes" class="form-control">
+				<option value="qno">No</option>
+				<option value="qyes">Yes</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label>Dynamically load post after submit?</label>
+			<select id="reload" class="form-control">
+				<option value="true">Yes</option>
+				<option value="false">No</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label>Open first page of Thread?</label>
+			<select id="first" class="form-control">
+				<option value="false">No</option>
+				<option value="true">Yes</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label>Disable scroll in posts?</label>
+			<select id="scroll" class="form-control">
+				<option value="true">Yes</option>
+				<option value="false">No</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label>SFW (Safe For Work) Mode?</label>
+			<select id="sfw" class="form-control">
+				<option value="false">No</option>
+				<option value="true">Yes</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label>Color for unclicked image links:</label>
+			<input id="color" class="form-control color">
+		</div>
+		<button id="saveBtn">Save</button>
+		<div id="status"></div><br />
+		<!--<button id="resetBtn">Revert Settings to Default</button>-->
+		<script type="text/javascript" src="jscolor/jscolor.js"></script>
+		<script type="text/javascript" src="options_ui.js"></script>
+	</body>
+</html>
