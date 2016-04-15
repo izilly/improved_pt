@@ -1,6 +1,6 @@
-chrome.extension.onRequest.addListener(
-	function(request, sender, sendResponse) {
-		if (request.set === "show") {
+chrome.runtime.onMessage.addListener(
+	function(request, sender, sendResponse) {//console.log(request); console.log(sender);
+		if (request.set === "show") {//console.log('background.js received show request');
 			chrome.storage.sync.get({
 				show: 'click',
 				color: '0000FF',
@@ -10,10 +10,11 @@ chrome.extension.onRequest.addListener(
 				scroll: 'true',
 				sfw: 'false'
 			},
-			function(items) {
+			function(items) {//console.log(items);
 				sendResponse({setShow: items.show, setColor: items.color, setVideo: items.video, setQuotes: items.quotes, setReload: items.reload, setScroll: items.scroll, setSfw: items.sfw});
 			});
-		} else if (request.set === "index") {
+			return true;
+		} else if (request.set === "index") {//console.log('background.js received index request');
 			chrome.storage.sync.get({
 				first: 'true',
 				sfw: 'false'
@@ -21,16 +22,28 @@ chrome.extension.onRequest.addListener(
 			function(items) {
 				sendResponse({setFirst: items.first, setSfw: items.sfw});
 			});
-		} else if (request.set === "print") {
-			var url = "data:text/html," + encodeURIComponent(request.html);
-			chrome.tabs.create({url: url}, function (tab) {
-				sendResponse({tab: tab});
+			return true;
+		} else if (request.set === "print") {//console.log('background.js received print request');
+			chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+				//var url = "data:text/html," + encodeURIComponent(request.html),
+				var index = tabs[0].index + 1;
+				chrome.tabs.create({index: index, url: chrome.extension.getURL("blankpage.html")}, function (tab) {
+					var tableHead = request.tableHead, tableBody = request.tableBody;
+					chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+						if (tabId === tab.id) {
+							chrome.runtime.sendMessage({action: "loadPrintPage", tableHead: tableHead, tableBody: tableBody}, function(response) {
+								//console.log(response);
+							});
+						}
+					});
+					sendResponse({tab: tab});
+				});
 			});
 		} else {
 			sendResponse({}); // snub them.
 		}
-	});
-
+	}
+);
 chrome.storage.sync.get({
 	show: 'load'
 },

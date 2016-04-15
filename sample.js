@@ -82,10 +82,11 @@ var improvedPT = {};
 	improvedPT.filterForThreadSubject = function (obj) {
 		return obj.type === "Thread";
 	};
-	improvedPT.createTabForPrint = function (htmlCode) {
-		chrome.extension.sendRequest({
+	improvedPT.createTabForPrint = function (tableHead, tableBody) {
+		chrome.runtime.sendMessage({
 			set: "print",
-			html: htmlCode
+			tableHead: tableHead,
+			tableBody: tableBody
 		}, function(response) {
 			//console.log(response.tab);
 		});
@@ -109,7 +110,7 @@ var improvedPT = {};
 		//var opened = window.open('');
 		//opened.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>My title</title><style type="text/css">blockquote{border:1px solid rgba(221,221,221,.5);padding:3px;margin:6px 15px;}th{font-weight:normal;}td.ptdata,th.pthead{font-size:11px;vertical-align:top;}th.pthead{text-align:left;}td.ptdata{text-align:right;width:150px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}td.ptdata span,th.pthead span{font-size:12px;font-weight:bold;}td.ptpost{vertical-align:top;font-size:12px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}</style></head><body><table><thead>' + tableHead + '</thead><tbody>' + tableBody + '</tbody></table></body></html>');
 		var htmlCode = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>My title</title><style type="text/css">blockquote{border:1px solid rgba(221,221,221,.5);padding:3px;margin:6px 15px;}th{font-weight:normal;}td.ptdata,th.pthead{font-size:11px;vertical-align:top;}th.pthead{text-align:left;}td.ptdata{text-align:right;width:150px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}td.ptdata span,th.pthead span{font-size:12px;font-weight:bold;}td.ptpost{vertical-align:top;font-size:12px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}</style></head><body><table><thead>' + tableHead + '</thead><tbody>' + tableBody + '</tbody></table></body></html>';
-		improvedPT.createTabForPrint(htmlCode);
+		improvedPT.createTabForPrint(tableHead, tableBody);
 	};
 	improvedPT.addPrintThread = function () {
 		$(".topic_header .mod_tools > span a#scrollDown").after('<a href="#" id="printThread" title="Print Thread">Print</a>');
@@ -373,116 +374,119 @@ var improvedPT = {};
 	$("img").on("mousedown", function() {
 		improvedPT.lastele = $(this);
 	});
+	$(document).ready(function() {
+		chrome.runtime.sendMessage({
+			set: "show"
+		}, function(response) {
+			
+				//console.log(response);
+				improvedPT.showSet = response.setShow;
+				improvedPT.colorSet = response.setColor;
+				improvedPT.quotesSet = response.setQuotes;
+				improvedPT.videoSet = response.setVideo;
+				improvedPT.reloadTopic = response.setReload;
+				improvedPT.scrollSet = response.setScroll;
+				improvedPT.sfwSet = response.setSfw;
+				if (improvedPT.reloadTopic !== "false") {
+					setTimeout(function () {
+						$('button[data-bind*="click: postReply"]').after($('button[data-bind*="click: postReply"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'postReplyBtn')).hide();
+						$('button[data-bind*="click: onPreview"]').after($('button[data-bind*="click: onPreview"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'previewReplyBtn')).hide();
+					}, 2500);
+					$(document).off('click', '#postReplyBtn').on("click", '#postReplyBtn', function(e) {
+						e.preventDefault;
+						$(this).val("Posting...").attr('disabled', 'disabled');
+						$("#errorExplanation").remove();
+						if (checkOc($("#new_post textarea").val(), "quote") > 8) {
 
-	chrome.extension.sendRequest({
-		set: "show"
-	}, function(response) {
-		improvedPT.showSet = response.setShow;
-		improvedPT.colorSet = response.setColor;
-		improvedPT.quotesSet = response.setQuotes;
-		improvedPT.videoSet = response.setVideo;
-		improvedPT.reloadTopic = response.setReload;
-		improvedPT.scrollSet = response.setScroll;
-		improvedPT.sfwSet = response.setSfw;
-		if (improvedPT.reloadTopic !== "false") {
-			setTimeout(function () {
-				$('button[data-bind*="click: postReply"]').after($('button[data-bind*="click: postReply"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'postReplyBtn')).hide();
-				$('button[data-bind*="click: onPreview"]').after($('button[data-bind*="click: onPreview"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'previewReplyBtn')).hide();
-			}, 2500);
-			$(document).off('click', '#postReplyBtn').on("click", '#postReplyBtn', function(e) {
-				e.preventDefault;
-				$(this).val("Posting...").attr('disabled', 'disabled');
-				$("#errorExplanation").remove();
-				if (checkOc($("#new_post textarea").val(), "quote") > 8) {
-
-					$("#applicationHost").after('<div class="errorExplanation" id="errorExplanation"><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>You cannot have more than 4 quotes.</li></ul></div>');
-					$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
-					return false;
-				}
-				if ($("#new_post textarea").val().length < 1) {
-					var errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Body is too short (minimum is 2 characters)</li></ul></div>";
-					$("#applicationHost").after(errorHTML);
-					return false;
-				} else if ($("#new_post textarea").val().length < 2) {
-					$("#new_post textarea").val($("#new_post textarea").val() + " ");
-				}
-				$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/posts", {"Body": $("#new_post textarea").val(), "ThreadId": location.pathname.split('/')[4]}, function() {
-					improvedPT.mt = true;
-					$("#new_post textarea").val("");
-					$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
-					improvedPT.afterAjax();
-				});
-			});
-			$(document).off('click', '#previewReplyBtn').on("click", '#previewReplyBtn', function(e) {
-				e.preventDefault;
-				$(this).val("Previewing...").attr('disabled', 'disabled');
-				$("#errorExplanation").remove();
-				if (checkOc($("#new_post textarea").val(), "quote") > 8) {
-
-					$("#applicationHost").after('<div class="errorExplanation" id="errorExplanation"><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>You cannot have more than 4 quotes.</li></ul></div>');
-					$('#previewReplyBtn').val("Preview").removeAttr("disabled");
-					return false;
-				}
-				if ($("#new_post textarea").val().length < 1) {
-					var errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Body is too short (minimum is 2 characters)</li></ul></div>";
-					$("#applicationHost").after(errorHTML);
-					return false;
-				} else if ($("#new_post textarea").val().length < 2) {
-					$("#new_post textarea").val($("#new_post textarea").val() + " ");
-				}
-				//var app = require('durandal/app');
-				//app.showMessage($("#new_post textarea").val(), "Your thoughts...", ["Close"], !0, {style:{width:"800px",height:"400px"}});
-				var message = $("#new_post textarea").val();
-				var messageBody = XBBCODE.process({text: message, removeMisalignedTags: false, addInLineBreaks: true});
-				BootstrapDialog.show({
-					title: 'Your thoughts...',
-					message: messageBody.html,
-					onhide: function () {
-						$('#previewReplyBtn').val("Preview").removeAttr("disabled");
-					},
-					buttons: [{
-						label: 'Close',
-						action: function (dialogRef) {
-							dialogRef.close();
+							$("#applicationHost").after('<div class="errorExplanation" id="errorExplanation"><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>You cannot have more than 4 quotes.</li></ul></div>');
+							$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
+							return false;
 						}
-					}]
-				});
-			});
-		}
-		if (!improvedPT.colorSet) {
-			improvedPT.colorSet = "0000FF";
-		}
-		setTimeout(function () {
-			if (improvedPT.sfwSet !== "false") {
-				$('body').attr('style', function(i, s) { return (s||'') + 'background: #fff !important;'; });
-				$('#main').css('background', '#fff');
-				$('#branding').css('display', 'none');
-				$('.col1 .yuimenu a').attr('style', function(i, s) { return (s||'') + 'color: #337ab7 !important;'; });
-				$('.col1_container').attr('style', function(i, s) { return (s||'') + 'background: #fafafa !important;'; });
-				$('.col1_container').attr('style', function(i, s) { return (s||'') + 'border: 1px solid #ccc !important;'; });
-				$('.post_listing .topic_header').css('color', '#444');
-				$('.post_listing .topic_header').attr('style', function(i, s) { return (s||'') + 'background: #fff !important;'; });
-				$('.post_listing .topic_header').attr('style', function(i, s) { return (s||'') + 'border: 1px solid #ccc !important;'; });
-				$('.post_listing .topic_header .mod_tools a').css('color', '#337ab7');
-				$('.btn-success').css({"color": "#444", "background-color": "#f0f0f0", "border-color": "#ccc"});
-				$('.post_listing .post .post_header span.poster_name a').css('color', '#337ab7');
-				$('.rbroundbox h4').css('color', '#444');
-				$('#pt_menubar_top_container').css({"height": "50px", "background": "#0c0c0c", "position": "relative", "z-index": "29"});
-				$('#pt_menubar_top').css({"z-index": "0", "position": "relative", "display": "block", "visibility": "visible"});
-				$('#pt_menubar_top').prepend('<a href="/" id="logo" class="nav__logo"></a>');
-				$('.nav__logo').css({"background-image": "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFUAAABVCAMAAAAPK1hoAAAATlBMVEXLAADOEBD////YQED87+/SICD88PDfYGDVMDDywMDsoKDyv7/bUFD10ND439/lgIDokJD54ODicHDvsLD1z8/rn5/vr6/oj4/bT0/eX18SZPv4AAACRUlEQVR4Ae3W227jLBRA4c3i7LPjHNr3f9FfDCll9NuOpbll3WUjfSEuIZVWq9VqtVqt1k7KLzE6gDm9vI2wDfX6POI2XV4DSAROTL2Ry6oaIdUpeWfX9+S6qpJZq5F3m7wbobDX1MEBtRoApt7kt0h5gHsPMFxTPSnz+CofdwaeIsGAs5LqgPk9UVfUgdRLKd/FP3nZAH1zwZdnEAG1ODUn/YJqHWC0WhzlCcSkzkTpAf1Wk9HJBNjPakxoCCulojIEYKxU9ADEj6oGCMGxp66qA26VOpbtn6oxMSqh9F9lmNW0kv88RcVbYP2gWsCoDjBeSkV19gYslerUAszn6g1YEk1Ba5VNJiAUtWz/VN2AkOhedlW0BmKlYj3Qnarjz9pwoI7yTKuVGuUO6DMVuMsKyIHKzQJrefey/Q9qFM7U/H2iUlfpgA/qKNOhugGLMpWxALM15+r9/LnqCQi+MpQp279wBuKOWk5AXxn5BEz8w3nVCWTQtXEH9HCqJtCpDnB+V7W8r4NilO0fq2k1f10gDpJTK0WVch0UowN8uHJnGeqo1AQ6O1eGTRO1HKllsy6E6UgVn6+DYpTtn6nWJFarl6GO8KPmG1XXxgTY24XfrUWp70f/21Pij6qBUR7m1xjydXCX9dNvrOsGJVUzQJ50+Y4NFKMHfNYnOWgw7NfndWWAMVb/ddgyoZOj1JPddHVQcqH+fClj5Ti94xr/v0+TJxVrgpymvl99bwp571+2Xn1NmEc9sY+J6a9Jq9VqtVqtVus/4SAa34bCihgAAAAASUVORK5CYII=')", "background-position": "0 0", "background-repeat": "no-repeat", "background-size": "60px", "display": "inline-block", "height": "60px", "position": "relative", "width": "60px", "z-index": "33"});
-				$('#pt_menubar_top div.bd').css({"position": "absolute", "top": "0", "left": "70px", "line-height": "50px", "display": "block", "width": "914px"});
-				$('#pt_menubar_top div.bd ul').css({"position": "absolute", "top": "0", "line-height": "50px", "display": "block", "width": "914px"});
-				$('#pt_menubar_top div.bd ul li').css({"line-height": "50px"});
-				$('#pt_menubar_top .yuimenubaritem').css({"font-size": "15px", "padding": "0"});
-				$('#pt_menubar_top div.bd ul li a').css({"border-right": "1px solid #595959", "font-weight": "300", "display": "inline-block", "line-height": "1", "margin": "0 .4em 0 0", "padding": "0 .3em 0 0", "letter-spacing": ".04em", "-moz-transition": "color .2s", "-o-transition": "color .2s", "-webkit-transition": "color .2s", "transition": "color .2s"});
-				$(".post:not(:hidden):even").removeClass("odd");
-				$(".post:not(:hidden):odd").removeClass("even");
-			}
-		}, 3500);
-		improvedPT.replaceLinks();
-	});
+						if ($("#new_post textarea").val().length < 1) {
+							var errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Body is too short (minimum is 2 characters)</li></ul></div>";
+							$("#applicationHost").after(errorHTML);
+							return false;
+						} else if ($("#new_post textarea").val().length < 2) {
+							$("#new_post textarea").val($("#new_post textarea").val() + " ");
+						}
+						$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/posts", {"Body": $("#new_post textarea").val(), "ThreadId": location.pathname.split('/')[4]}, function() {
+							improvedPT.mt = true;
+							$("#new_post textarea").val("");
+							$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
+							improvedPT.afterAjax();
+						});
+					});
+					$(document).off('click', '#previewReplyBtn').on("click", '#previewReplyBtn', function(e) {
+						e.preventDefault;
+						$(this).val("Previewing...").attr('disabled', 'disabled');
+						$("#errorExplanation").remove();
+						if (checkOc($("#new_post textarea").val(), "quote") > 8) {
 
+							$("#applicationHost").after('<div class="errorExplanation" id="errorExplanation"><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>You cannot have more than 4 quotes.</li></ul></div>');
+							$('#previewReplyBtn').val("Preview").removeAttr("disabled");
+							return false;
+						}
+						if ($("#new_post textarea").val().length < 1) {
+							var errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Body is too short (minimum is 2 characters)</li></ul></div>";
+							$("#applicationHost").after(errorHTML);
+							return false;
+						} else if ($("#new_post textarea").val().length < 2) {
+							$("#new_post textarea").val($("#new_post textarea").val() + " ");
+						}
+						//var app = require('durandal/app');
+						//app.showMessage($("#new_post textarea").val(), "Your thoughts...", ["Close"], !0, {style:{width:"800px",height:"400px"}});
+						var message = $("#new_post textarea").val();
+						var messageBody = XBBCODE.process({text: message, removeMisalignedTags: false, addInLineBreaks: true});
+						BootstrapDialog.show({
+							title: 'Your thoughts...',
+							message: messageBody.html,
+							onhide: function () {
+								$('#previewReplyBtn').val("Preview").removeAttr("disabled");
+							},
+							buttons: [{
+								label: 'Close',
+								action: function (dialogRef) {
+									dialogRef.close();
+								}
+							}]
+						});
+					});
+				}
+				if (!improvedPT.colorSet) {
+					improvedPT.colorSet = "0000FF";
+				}
+				setTimeout(function () {
+					if (improvedPT.sfwSet !== "false") {
+						$('body').attr('style', function(i, s) { return (s||'') + 'background: #fff !important;'; });
+						$('#main').css('background', '#fff');
+						$('#branding').css('display', 'none');
+						$('.col1 .yuimenu a').attr('style', function(i, s) { return (s||'') + 'color: #337ab7 !important;'; });
+						$('.col1_container').attr('style', function(i, s) { return (s||'') + 'background: #fafafa !important;'; });
+						$('.col1_container').attr('style', function(i, s) { return (s||'') + 'border: 1px solid #ccc !important;'; });
+						$('.post_listing .topic_header').css('color', '#444');
+						$('.post_listing .topic_header').attr('style', function(i, s) { return (s||'') + 'background: #fff !important;'; });
+						$('.post_listing .topic_header').attr('style', function(i, s) { return (s||'') + 'border: 1px solid #ccc !important;'; });
+						$('.post_listing .topic_header .mod_tools a').css('color', '#337ab7');
+						$('.btn-success').css({"color": "#444", "background-color": "#f0f0f0", "border-color": "#ccc"});
+						$('.post_listing .post .post_header span.poster_name a').css('color', '#337ab7');
+						$('.rbroundbox h4').css('color', '#444');
+						$('#pt_menubar_top_container').css({"height": "50px", "background": "#0c0c0c", "position": "relative", "z-index": "29"});
+						$('#pt_menubar_top').css({"z-index": "0", "position": "relative", "display": "block", "visibility": "visible"});
+						$('#pt_menubar_top').prepend('<a href="/" id="logo" class="nav__logo"></a>');
+						$('.nav__logo').css({"background-image": "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFUAAABVCAMAAAAPK1hoAAAATlBMVEXLAADOEBD////YQED87+/SICD88PDfYGDVMDDywMDsoKDyv7/bUFD10ND439/lgIDokJD54ODicHDvsLD1z8/rn5/vr6/oj4/bT0/eX18SZPv4AAACRUlEQVR4Ae3W227jLBRA4c3i7LPjHNr3f9FfDCll9NuOpbll3WUjfSEuIZVWq9VqtVqt1k7KLzE6gDm9vI2wDfX6POI2XV4DSAROTL2Ry6oaIdUpeWfX9+S6qpJZq5F3m7wbobDX1MEBtRoApt7kt0h5gHsPMFxTPSnz+CofdwaeIsGAs5LqgPk9UVfUgdRLKd/FP3nZAH1zwZdnEAG1ODUn/YJqHWC0WhzlCcSkzkTpAf1Wk9HJBNjPakxoCCulojIEYKxU9ADEj6oGCMGxp66qA26VOpbtn6oxMSqh9F9lmNW0kv88RcVbYP2gWsCoDjBeSkV19gYslerUAszn6g1YEk1Ba5VNJiAUtWz/VN2AkOhedlW0BmKlYj3Qnarjz9pwoI7yTKuVGuUO6DMVuMsKyIHKzQJrefey/Q9qFM7U/H2iUlfpgA/qKNOhugGLMpWxALM15+r9/LnqCQi+MpQp279wBuKOWk5AXxn5BEz8w3nVCWTQtXEH9HCqJtCpDnB+V7W8r4NilO0fq2k1f10gDpJTK0WVch0UowN8uHJnGeqo1AQ6O1eGTRO1HKllsy6E6UgVn6+DYpTtn6nWJFarl6GO8KPmG1XXxgTY24XfrUWp70f/21Pij6qBUR7m1xjydXCX9dNvrOsGJVUzQJ50+Y4NFKMHfNYnOWgw7NfndWWAMVb/ddgyoZOj1JPddHVQcqH+fClj5Ti94xr/v0+TJxVrgpymvl99bwp571+2Xn1NmEc9sY+J6a9Jq9VqtVqtVus/4SAa34bCihgAAAAASUVORK5CYII=')", "background-position": "0 0", "background-repeat": "no-repeat", "background-size": "60px", "display": "inline-block", "height": "60px", "position": "relative", "width": "60px", "z-index": "33"});
+						$('#pt_menubar_top div.bd').css({"position": "absolute", "top": "0", "left": "70px", "line-height": "50px", "display": "block", "width": "914px"});
+						$('#pt_menubar_top div.bd ul').css({"position": "absolute", "top": "0", "line-height": "50px", "display": "block", "width": "914px"});
+						$('#pt_menubar_top div.bd ul li').css({"line-height": "50px"});
+						$('#pt_menubar_top .yuimenubaritem').css({"font-size": "15px", "padding": "0"});
+						$('#pt_menubar_top div.bd ul li a').css({"border-right": "1px solid #595959", "font-weight": "300", "display": "inline-block", "line-height": "1", "margin": "0 .4em 0 0", "padding": "0 .3em 0 0", "letter-spacing": ".04em", "-moz-transition": "color .2s", "-o-transition": "color .2s", "-webkit-transition": "color .2s", "transition": "color .2s"});
+						$(".post:not(:hidden):even").removeClass("odd");
+						$(".post:not(:hidden):odd").removeClass("even");
+					}
+				}, 3500);
+				improvedPT.replaceLinks();
+			
+		});
+	});
 	chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 		if (request.run === "replaceLinks") {
 			var videoset2 = improvedPT.videoSet;
