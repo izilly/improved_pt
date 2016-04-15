@@ -222,6 +222,13 @@ var improvedPT = {};
 			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/threads/" + location.pathname.split('/')[4] + "/posts?limit=499&skip=0", function(data) {
 				improvedPT.posts = data.data;
 				improvedPT.postsrefs = data.references;
+
+				var filteredpostsrefs, tempPostsData = []; for (var i = 0; i < improvedPT.posts.length; i += 1) {filteredpostsrefs = improvedPT.postsrefs.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId}); if (tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId}).length < 1) { tempPostsData.push({id: improvedPT.posts[i].authorId, qty: 1, username: filteredpostsrefs[0].username}); } else {tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId})[0].qty = tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId})[0].qty + 1} }
+				tempPostsData.sort(function(a,b) {return (b.qty > a.qty) ? 1 : ((a.qty > b.qty) ? -1 : 0);} );
+				$('.col1_container').after('<ol class="ipt_stats_container"></ol>');
+				for (var i = 0; i < tempPostsData.length; i += 1) {
+					$('.ipt_stats_container').append('<li>' + tempPostsData[i].username + ' ' + tempPostsData[i].qty + '</li>').css({'font-size': '0.7em', 'padding': '5px 15px'});
+				}
 			});
 
 			setTimeout(improvedPT.checkMT, 2000);

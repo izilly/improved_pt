@@ -1,3 +1,6 @@
+2.0.0.2
+Added preliminary version of rizajj's thread stats
+
 2.0.0.1
 Prevent requests being made to mythreads when a user is not logged-in.
 Possible fix for quoting bug
