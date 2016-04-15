@@ -70,20 +70,25 @@ var contextMenu = chrome.contextMenus.create({
 });
 
 function send() {
-	chrome.tabs.getSelected(null, function(tab) {
-		chrome.tabs.sendRequest(tab.id, {run: "replaceLinks"}, function(response) {
+	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+		var index = tabs[0].index;
+		chrome.tabs.sendMessage(tabs[0].id, {run: "replaceLinks"}, function(response) {
 		});
 	});
 }
 function close() {
-	chrome.tabs.getSelected(null, function(tab) {
-		chrome.tabs.sendRequest(tab.id, {run: "close"}, function(response) {
+	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+		//var url = "data:text/html," + encodeURIComponent(request.html),
+		var index = tabs[0].index;
+		chrome.tabs.sendMessage(tabs[0].id, {run: "close"}, function(response) {
 		});
 	});
 }
 function closeAll() {
-	chrome.tabs.getSelected(null, function(tab) {
-		chrome.tabs.sendRequest(tab.id, {run: "closeAll"}, function(response) {
+	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+		//var url = "data:text/html," + encodeURIComponent(request.html),
+		var index = tabs[0].index;
+		chrome.tabs.sendMessage(tabs[0].id, {run: "closeAll"}, function(response) {
 		});
 	});
 }
