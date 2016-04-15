@@ -4,7 +4,7 @@ chrome.runtime.onMessage.addListener(
 		/*console.log(sender.tab ?
 		"from a content script:" + sender.tab.url :
 		"from the extension");*/
-		if (request.action == "loadPrintPage") {
+		if (request.action === "loadPrintPage") {
 			//console.log(request.tableHead);
 			//console.log(request.tableBody);
 			document.getElementById("thead").innerHTML = request.tableHead;

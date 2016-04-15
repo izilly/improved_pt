@@ -28,20 +28,24 @@ var improvedPT = {};
 		return band[0].url;
 	};
 	improvedPT.checkMT = function () {
-		var topic = $("#post-listing .topic_title").text();
-		improvedPT.mt = false;
-		$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/mythreads?skip=0&pageSize=40", function(data) {
-			improvedPT.mythreads = data.aaData;
-			for (var i=0; i < improvedPT.mythreads.length; i+=1) {
-				if (improvedPT.mythreads[i].Subject === topic) {
-					improvedPT.mt = true;
+		var topic = $("#post-listing .topic_title").text(),
+			isLoggedIn = $('.yuimenubaritem.session_menu_item a[href="/my/profile"]').length > 0;
+		if (isLoggedIn) {
+			improvedPT.mt = false;
+			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/mythreads?skip=0&pageSize=40", function (data) {
+				var i;
+				improvedPT.mythreads = data.aaData;
+				for (i = 0; i < improvedPT.mythreads.length; i += 1) {
+					if (improvedPT.mythreads[i].Subject === topic) {
+						improvedPT.mt = true;
+					}
 				}
-			}
-			if (improvedPT.mt) {
-				$("#bottom-pagination-container div a:contains('MT')").html($("#bottom-pagination-container div a:contains('MT')").html() + '✔');
-				$(".topic_header div a:contains('MT')").html($(".topic_header div a:contains('MT')").html() + '✔');
-			}
-		});
+				if (improvedPT.mt) {
+					$("#bottom-pagination-container div a:contains('MT')").html($("#bottom-pagination-container div a:contains('MT')").html() + '✔');
+					$(".topic_header div a:contains('MT')").html($(".topic_header div a:contains('MT')").html() + '✔');
+				}
+			});
+		}
 	};
 	improvedPT.addScrollDown = function () {
 		$(".topic_header .mod_tools > a:last").after('<span class="usr_tools"><a href="#" id="scrollDown" title="Go Down">Down</a></span>');
@@ -55,6 +59,7 @@ var improvedPT = {};
 	};
 	improvedPT.afterAjax = function () {
 		$('button.btn.btn-default.btn-large.load-more-button').click();
+		setTimeout(improvedPT.enableQuoteOverride, 2500);
 	};
 	$(document).off("click", "#bottom-pagination-container div + div > a:last").on("click", "#bottom-pagination-container div + div > a:last", function() {
 		improvedPT.afterAjax();
@@ -87,8 +92,6 @@ var improvedPT = {};
 			set: "print",
 			tableHead: tableHead,
 			tableBody: tableBody
-		}, function(response) {
-			//console.log(response.tab);
 		});
 	};
 	improvedPT.createPrintPage = function () {
@@ -109,7 +112,7 @@ var improvedPT = {};
 		}
 		//var opened = window.open('');
 		//opened.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>My title</title><style type="text/css">blockquote{border:1px solid rgba(221,221,221,.5);padding:3px;margin:6px 15px;}th{font-weight:normal;}td.ptdata,th.pthead{font-size:11px;vertical-align:top;}th.pthead{text-align:left;}td.ptdata{text-align:right;width:150px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}td.ptdata span,th.pthead span{font-size:12px;font-weight:bold;}td.ptpost{vertical-align:top;font-size:12px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}</style></head><body><table><thead>' + tableHead + '</thead><tbody>' + tableBody + '</tbody></table></body></html>');
-		var htmlCode = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>My title</title><style type="text/css">blockquote{border:1px solid rgba(221,221,221,.5);padding:3px;margin:6px 15px;}th{font-weight:normal;}td.ptdata,th.pthead{font-size:11px;vertical-align:top;}th.pthead{text-align:left;}td.ptdata{text-align:right;width:150px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}td.ptdata span,th.pthead span{font-size:12px;font-weight:bold;}td.ptpost{vertical-align:top;font-size:12px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}</style></head><body><table><thead>' + tableHead + '</thead><tbody>' + tableBody + '</tbody></table></body></html>';
+		//var htmlCode = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>My title</title><style type="text/css">blockquote{border:1px solid rgba(221,221,221,.5);padding:3px;margin:6px 15px;}th{font-weight:normal;}td.ptdata,th.pthead{font-size:11px;vertical-align:top;}th.pthead{text-align:left;}td.ptdata{text-align:right;width:150px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}td.ptdata span,th.pthead span{font-size:12px;font-weight:bold;}td.ptpost{vertical-align:top;font-size:12px;padding-bottom:15px;border-top:1px solid rgba(221,221,221,.5);}</style></head><body><table><thead>' + tableHead + '</thead><tbody>' + tableBody + '</tbody></table></body></html>';
 		improvedPT.createTabForPrint(tableHead, tableBody);
 	};
 	improvedPT.addPrintThread = function () {
@@ -128,8 +131,8 @@ var improvedPT = {};
 	improvedPT.addBoldText = function () {
 		$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
 		$(document).on("click", "#boldText", function (e) {
-			e.preventDefault();
 			var el = $('#new_post textarea')[0];
+			e.preventDefault();
 			if (el.setSelectionRange) {
 				el.value = el.value.substring(0,el.selectionStart) + "[b]" + el.value.substring(el.selectionStart,el.selectionEnd) + "[/b]" + el.value.substring(el.selectionEnd,el.value.length);
 			}
@@ -137,8 +140,8 @@ var improvedPT = {};
 	};
 	improvedPT.addItalicText = function () {
 		$(document).on("click", "#italicText", function (e) {
-			e.preventDefault();
 			var el = $('#new_post textarea')[0];
+			e.preventDefault();
 			if (el.setSelectionRange) {
 				el.value = el.value.substring(0,el.selectionStart) + "[i]" + el.value.substring(el.selectionStart,el.selectionEnd) + "[/i]" + el.value.substring(el.selectionEnd,el.value.length);
 			}
@@ -146,8 +149,8 @@ var improvedPT = {};
 	};
 	improvedPT.addBoldItalicText = function () {
 		$(document).on("click", "#boldItalicText", function (e) {
-			e.preventDefault();
 			var el = $('#new_post textarea')[0];
+			e.preventDefault();
 			if (el.setSelectionRange) {
 				el.value = el.value.substring(0,el.selectionStart) + "[b][i]" + el.value.substring(el.selectionStart,el.selectionEnd) + "[/i][/b]" + el.value.substring(el.selectionEnd,el.value.length);
 			}
@@ -193,17 +196,18 @@ var improvedPT = {};
 	};
 	improvedPT.enableQuoteOverride = function () {
 		$('a[href="#reply"]').parent('span').html('').html('<a class="add_quote_to_reply" title="Quote Post In Reply"><img src="/Content/images/sprites/quote.png"></a>');
-		$(document).on('click', '.add_quote_to_reply', function (e) {
+		$(document).off('click', '.add_quote_to_reply').on('click', '.add_quote_to_reply', function (e) {
+			var postId = $(this).closest('.post_tools').find('a[href^="/PhantasyMail/"]').attr('href').replace(/\D/g,''),
+				userName = $(this).closest('.post_header').find('.poster_name a').text();
 			e.preventDefault();
-			var postId = $(this).closest('.post_tools').find('a[href^="/PhantasyMail/"]').attr('href').replace(/\D/g,'');
-			var userName = $(this).closest('.post_header').find('.poster_name a').text();
-			var originalTextAreaContent = $('#new_post textarea').val();
 			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/threads/" + location.pathname.split('/')[4] + "/posts?limit=499&skip=0", function(data) {
+				var quotedPostBody = '', quotedQuotedPostBody = '', originalTextAreaContent = '';
 				improvedPT.posts = data.data;
 				improvedPT.postsrefs = data.references;
-				var quotedPostBody = improvedPT.getPostBodyById(improvedPT.posts, postId);
-				var quotedQuotedPostBody = '[quote=' + userName + ']' + quotedPostBody + '[/quote]';
-				$('#new_post textarea').val(originalTextAreaContent + quotedQuotedPostBody);
+				quotedPostBody = improvedPT.getPostBodyById(improvedPT.posts, postId);//console.log('quotedPostBody: ' + quotedPostBody);
+				quotedQuotedPostBody = '[quote=' + userName + ']' + quotedPostBody + '[/quote]';//console.log('quotedQuotedPostBody: ' + quotedQuotedPostBody);
+				originalTextAreaContent = $('#new_post textarea').val();//console.log('originalTextAreaContent: ' + originalTextAreaContent);
+				$('#new_post textarea').val(originalTextAreaContent + quotedQuotedPostBody);//console.log('originalTextAreaContent + quotedQuotedPostBody: ' + originalTextAreaContent + quotedQuotedPostBody);
 				$('html, body').animate({
 					scrollTop: $("#reply").offset().top
 				}, "slow");
@@ -236,14 +240,15 @@ var improvedPT = {};
 	});
 
 	improvedPT.replaceLinks = function () {
+		var temp = true;
 		/*$.post("http://"+wnindow.location.host + window.location.pathname, {authenticity_token: $('input[name*="authenticity_token"]').val(), post_body:"testing123",post_topic_id: topic,commit: "Post Reply"}, function(data) {
 				alert(data);
 			});*/
 		$("a[href$='.jpg'], a[href$='.jpeg'], a[href$='.png'], a[href$='.gif']").each(function(i) {
-			var href = $(this).attr('href');
-			var text = $(this).text();
+			var href = $(this).attr('href'),
+				text = $(this).text(),
+				stringer = "";
 			improvedPT.originalColor = $(this).css("color");
-			var stringer = "";
 			if (text !== href) {
 				stringer = text;
 			}
@@ -259,22 +264,22 @@ var improvedPT = {};
 				$(this).hide().parent("a").css("color", improvedPT.originalColor);
 			});
 		});
-		var temp = true;
 		if ($("a[href*='youtube'], a[href*='youtu.be'], a[href*='vimeo'], a[href$='.gifv']").length >= 10) {
 			temp = false;
 		}
 		$("a[href*='youtube'], a[href*='youtu.be']").each(function() {
-			var href = $(this).attr("href");
-			var text = $(this).text().replace("amp;", "");
-			var myregexp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i;
-			var id = href.match(myregexp); //^[^v]+v.(.{11}).*
+			var href = $(this).attr("href"),
+				text = $(this).text().replace("amp;", ""),
+				myregexp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i,
+				id = href.match(myregexp),
+				stringer, objectstr; //^[^v]+v.(.{11}).*
 			if (id == null) {return;}
 			else {id = id[1];}
-			var stringer = "";
+			stringer = "";
 			if (text !== href) {
 				stringer = text;
 			}
-			var objectstr = '<iframe class="youtube-player" type="text/html" width="100%" height="385" src="https://www.youtube.com/embed/' + id + '" frameborder="0"></iframe>';
+			objectstr = '<iframe class="youtube-player" type="text/html" width="100%" height="385" src="https://www.youtube.com/embed/' + id + '" frameborder="0"></iframe>';
 
 			if ((improvedPT.videoSet === "vload" && temp) && ($(this).parents("em").css("font-style") !== "italic" || improvedPT.quotesSet === "qyes")) {
 				$(this).css("color", "black").html(stringer + objectstr);
@@ -286,11 +291,11 @@ var improvedPT = {};
 			}
 		});
 		$("a[href*='vimeo']").each(function() {
-			var href = $(this).attr("href");
-			var text = $(this).text();
-			var id = href.match(/[0-9]+/, "");
-			var objectstr = '<iframe class="vimeo-player" src="https://player.vimeo.com/video/' + id + '?portrait=0" width="100%" height="335" frameborder="0"></iframe>';
-			var stringer = "";
+			var href = $(this).attr("href"),
+				text = $(this).text(),
+				id = href.match(/[0-9]+/, ""),
+				objectstr = '<iframe class="vimeo-player" src="https://player.vimeo.com/video/' + id + '?portrait=0" width="100%" height="335" frameborder="0"></iframe>',
+				stringer = "";
 			if (text !== href) {
 				stringer = text;
 			}
@@ -304,10 +309,10 @@ var improvedPT = {};
 			}
 		});
 		$("a[href$='.gifv']").each(function() {
-			var href = $(this).attr("href");
-			var text = $(this).text();
-			var objectstr = '<iframe class="gifv-player" src="' + href.replace('http://', 'https://') + '" width="100%" height="335" frameborder="0"></iframe>';
-			var stringer = "";
+			var href = $(this).attr("href"),
+				text = $(this).text(),
+				objectstr = '<iframe class="gifv-player" src="' + href.replace('http://', 'https://') + '" width="100%" height="335" frameborder="0"></iframe>',
+				stringer = "";
 			if (text !== href) {
 				stringer = text;
 			}
@@ -352,7 +357,6 @@ var improvedPT = {};
 	});
 
 
-
 	$(document).off("click", "#bottom-pagination-container div a:contains('MT'), .topic_header div a:contains('MT')").on("click", "#bottom-pagination-container div a:contains('MT'), .topic_header div a:contains('MT')", function() {
 		$.post("/api/mythreads/" + location.pathname.split('/')[4], function() {
 			$("#bottom-pagination-container div a:contains('MT')").html($("#bottom-pagination-container div a:contains('MT')").html() + '✔').css("color", "#757575");
@@ -393,17 +397,17 @@ var improvedPT = {};
 						$('button[data-bind*="click: onPreview"]').after($('button[data-bind*="click: onPreview"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'previewReplyBtn')).hide();
 					}, 2500);
 					$(document).off('click', '#postReplyBtn').on("click", '#postReplyBtn', function(e) {
+						var errorHTML;
 						e.preventDefault;
 						$(this).val("Posting...").attr('disabled', 'disabled');
 						$("#errorExplanation").remove();
 						if (checkOc($("#new_post textarea").val(), "quote") > 8) {
-
 							$("#applicationHost").after('<div class="errorExplanation" id="errorExplanation"><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>You cannot have more than 4 quotes.</li></ul></div>');
 							$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 							return false;
 						}
 						if ($("#new_post textarea").val().length < 1) {
-							var errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Body is too short (minimum is 2 characters)</li></ul></div>";
+							errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Body is too short (minimum is 2 characters)</li></ul></div>";
 							$("#applicationHost").after(errorHTML);
 							return false;
 						} else if ($("#new_post textarea").val().length < 2) {
@@ -417,17 +421,17 @@ var improvedPT = {};
 						});
 					});
 					$(document).off('click', '#previewReplyBtn').on("click", '#previewReplyBtn', function(e) {
+						var errorHTML, message, messageBody;
 						e.preventDefault;
 						$(this).val("Previewing...").attr('disabled', 'disabled');
 						$("#errorExplanation").remove();
 						if (checkOc($("#new_post textarea").val(), "quote") > 8) {
-
 							$("#applicationHost").after('<div class="errorExplanation" id="errorExplanation"><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>You cannot have more than 4 quotes.</li></ul></div>');
 							$('#previewReplyBtn').val("Preview").removeAttr("disabled");
 							return false;
 						}
 						if ($("#new_post textarea").val().length < 1) {
-							var errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Body is too short (minimum is 2 characters)</li></ul></div>";
+							errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Body is too short (minimum is 2 characters)</li></ul></div>";
 							$("#applicationHost").after(errorHTML);
 							return false;
 						} else if ($("#new_post textarea").val().length < 2) {
@@ -435,8 +439,8 @@ var improvedPT = {};
 						}
 						//var app = require('durandal/app');
 						//app.showMessage($("#new_post textarea").val(), "Your thoughts...", ["Close"], !0, {style:{width:"800px",height:"400px"}});
-						var message = $("#new_post textarea").val();
-						var messageBody = XBBCODE.process({text: message, removeMisalignedTags: false, addInLineBreaks: true});
+						message = $("#new_post textarea").val();
+						messageBody = XBBCODE.process({text: message, removeMisalignedTags: false, addInLineBreaks: true});
 						BootstrapDialog.show({
 							title: 'Your thoughts...',
 							message: messageBody.html,
@@ -488,19 +492,20 @@ var improvedPT = {};
 		});
 	});
 	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+		var videoset2, showset2, par, href, stringer;
 		if (request.run === "replaceLinks") {
-			var videoset2 = improvedPT.videoSet;
-			var showset2 = improvedPT.showSet;
+			videoset2 = improvedPT.videoSet;
+			showset2 = improvedPT.showSet;
 			improvedPT.showSet = "load";
 			improvedPT.videoSet = "vload";
 			improvedPT.replaceLinks();
 			improvedPT.showSet = showset2;
 			improvedPT.videoSet = videoset2;
 		} else if (request.run === "close") {
-			var par = improvedPT.lastele.parent("a");
+			par = improvedPT.lastele.parent("a");
 			improvedPT.lastele.remove();
-			var href = par.attr("href");
-			var stringer = par.text();
+			href = par.attr("href");
+			stringer = par.text();
 			if (par.text().length === 0) {
 				par.html(href);
 			}
@@ -510,10 +515,11 @@ var improvedPT = {};
 			});
 		} else if (request.run === "closeAll") {
 			$(".addedPTImages").each(function() {
-				var par = $(this).parent("a");
+				var par, href, stringer;
+				par = $(this).parent("a");
 				$(this).remove();
-				var href = par.attr("href");
-				var stringer = par.text();
+				href = par.attr("href");
+				stringer = par.text();
 				if (par.text().length === 0) {
 					par.html(href);
 				}
@@ -523,10 +529,11 @@ var improvedPT = {};
 				});
 			});
 			$(".youtube-player").each(function() {
-				var par = $(this).parent("a");
+				var par, href, stringer;
+				par = $(this).parent("a");
 				$(this).remove();
-				var href = par.attr("href");
-				var stringer = par.text();
+				href = par.attr("href");
+				stringer = par.text();
 				if (par.text().length === 0) {
 					par.html(href);
 				}
@@ -536,11 +543,12 @@ var improvedPT = {};
 				});
 			});
 			$(".vimeo-player").each(function() {
-				var par = $(this).parent("a");
-				var href = par.attr("href");
+				var par, href, id, stringer;
+				par = $(this).parent("a");
+				href = par.attr("href");
 				$(this).remove();
-				var id = href.match(/[0-9]+/, "");
-				var stringer = par.text();
+				id = href.match(/[0-9]+/, "");
+				stringer = par.text();
 				if (par.text().length === 0) {
 					par.html(href);
 				}
@@ -550,10 +558,11 @@ var improvedPT = {};
 				});
 			});
 			$(".gifv-player").each(function() {
-				var par = $(this).parent("a");
-				var href = par.attr("href");
+				var par, href, stringer;
+				par = $(this).parent("a");
+				href = par.attr("href");
 				$(this).remove();
-				var stringer = par.text();
+				stringer = par.text();
 				if (par.text().length === 0) {
 					par.html(href);
 				}

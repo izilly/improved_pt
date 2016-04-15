@@ -31,9 +31,7 @@ chrome.runtime.onMessage.addListener(
 					var tableHead = request.tableHead, tableBody = request.tableBody;
 					chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 						if (tabId === tab.id) {
-							chrome.runtime.sendMessage({action: "loadPrintPage", tableHead: tableHead, tableBody: tableBody}, function(response) {
-								//console.log(response);
-							});
+							chrome.runtime.sendMessage({action: "loadPrintPage", tableHead: tableHead, tableBody: tableBody});
 						}
 					});
 					sendResponse({tab: tab});
@@ -44,12 +42,29 @@ chrome.runtime.onMessage.addListener(
 		}
 	}
 );
+
+function send() {
+	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+		chrome.tabs.sendMessage(tabs[0].id, {run: "replaceLinks"});
+	});
+}
+function close() {
+	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+		chrome.tabs.sendMessage(tabs[0].id, {run: "close"});
+	});
+}
+function closeAll() {
+	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+		chrome.tabs.sendMessage(tabs[0].id, {run: "closeAll"});
+	});
+}
+
 chrome.storage.sync.get({
 	show: 'load'
 },
 function(items) {
 	if (items.show !== "load") {
-		var contextMenu = chrome.contextMenus.create({
+		chrome.contextMenus.create({
 			"title": "Open All Links",
 			"contexts": ["page","selection","link","editable","audio","video"],
 			"onclick": send
@@ -57,38 +72,14 @@ function(items) {
 	}
 });
 
-var closeMenu = chrome.contextMenus.create({
+chrome.contextMenus.create({
 	"title": "Close Image",
 	"contexts": ["image"],
 	"onclick": close
 }); 
 
-var contextMenu = chrome.contextMenus.create({
+chrome.contextMenus.create({
 	"title": "Close All Links",
 	"contexts": ["page","selection","link","editable","audio","video"],
 	"onclick": closeAll
 });
-
-function send() {
-	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-		var index = tabs[0].index;
-		chrome.tabs.sendMessage(tabs[0].id, {run: "replaceLinks"}, function(response) {
-		});
-	});
-}
-function close() {
-	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-		//var url = "data:text/html," + encodeURIComponent(request.html),
-		var index = tabs[0].index;
-		chrome.tabs.sendMessage(tabs[0].id, {run: "close"}, function(response) {
-		});
-	});
-}
-function closeAll() {
-	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-		//var url = "data:text/html," + encodeURIComponent(request.html),
-		var index = tabs[0].index;
-		chrome.tabs.sendMessage(tabs[0].id, {run: "closeAll"}, function(response) {
-		});
-	});
-}

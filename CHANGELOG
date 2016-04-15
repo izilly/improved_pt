@@ -1,3 +1,7 @@
+2.0.0.1
+Prevent requests being made to mythreads when a user is not logged-in.
+Possible fix for quoting bug
+
 2.0.0.0
 Updated messaging API calls for fenningenarius
 
