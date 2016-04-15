@@ -27,7 +27,7 @@ function main() {
 	top2 = $("#threads_table tbody tr").attr("class");
 }
 
-chrome.extension.sendRequest({
+chrome.runtime.sendMessage({
 	set: "index"
 }, function (response) {
 	firstSet = response.setFirst;
