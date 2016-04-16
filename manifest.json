@@ -4,10 +4,10 @@
     },
     "content_scripts": [{
         "css": ["bootstrap-dialog.min.css"],
-        "js": ["jquery.min.js", "bootstrap.min.js", "bootstrap-dialog.min.js", "xbbcode.js", "sample.js"],
+        "js": ["jquery.min.js", "bootstrap.min.js", "bootstrap-dialog.min.js", "xbbcode.js", "dompurify/purify.min.js", "sample.js"],
         "matches": ["http://*.phantasytour.com/bands/*/threads/*/*", "https://*.phantasytour.com/bands/*/*threads/*/*"]
     }, {
-        "js": ["jquery.js", "index.js"],
+        "js": ["jquery.js", "dompurify/purify.min.js", "index.js"],
         "matches": ["https://*.phantasytour.com/bands/*/threads", "https://*.phantasytour.com/bands/*/threads", "http://*.phantasytour.com/bands/*/threads?mode=MyThreads", "https://*.phantasytour.com/bands/*/threads?mode=MyThreads"]
     }],
     "description": "Improving your PT viewing. Finds all links to images and videos on PT and embeds them in the page.",
@@ -26,6 +26,6 @@
     "options_page": "options.html",
     "permissions": ["http://*.phantasytour.com/*", "https://*.phantasytour.com/*", "contextMenus", "tabs", "storage", "activeTab"],
     "update_url": "http://clients2.google.com/service/update2/crx",
-    "version": "2.0.0.3",
+    "version": "2.0.0.4",
     "manifest_version": 2
 }

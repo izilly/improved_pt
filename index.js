@@ -10,10 +10,11 @@ var aprilfools = function() {
 		$(function() {
 			$(".topic_author_display_name > div > a").each(function() {
 				var name = $(this).text();
-				if (!name.match(/^.*420.*$/))
-					$(this).html(name+420);
-				else
-					$(this).html('wook');
+				if (!name.match(/^.*420.*$/)) {
+					$(this).html(DOMPurify.sanitize(name + 420, {SAFE_FOR_JQUERY: true}));
+				} else {
+					$(this).html(DOMPurify.sanitize('wook', {SAFE_FOR_JQUERY: true}));
+				}
 			});
 		});
 	}
@@ -34,7 +35,7 @@ chrome.runtime.sendMessage({
 	sfwSet = response.setSfw;
 	if (firstSet == "true") {
 		$(document).on("click", ".topic_subject a", function() {
-			$(this).attr("href", $(this).attr("href").split('#')[0] +"#page/1");
+			$(this).attr("href", DOMPurify.sanitize($(this).attr("href").split('#')[0] + "#page/1", {SAFE_FOR_JQUERY: true}));
 		});
 	}
 	if (sfwSet == "true") {

@@ -1,13 +1,13 @@
 // Saves options to chrome.storage.sync.
 function save_options() {
-	var show = document.getElementById('show').value;
-	var color = document.getElementById('color').value;
-	var quotes = document.getElementById('quotes').value;
-	var video = document.getElementById('video').value;
-	var reload = document.getElementById('reload').value;
-	var first = document.getElementById('first').value;
-	var scroll = document.getElementById('scroll').value;
-	var sfw = document.getElementById('sfw').value;
+	var show = DOMPurify.sanitize(document.getElementById('show').value, {SAFE_FOR_JQUERY: true});
+	var color = DOMPurify.sanitize(document.getElementById('color').value, {SAFE_FOR_JQUERY: true});
+	var quotes = DOMPurify.sanitize(document.getElementById('quotes').value, {SAFE_FOR_JQUERY: true});
+	var video = DOMPurify.sanitize(document.getElementById('video').value, {SAFE_FOR_JQUERY: true});
+	var reload = DOMPurify.sanitize(document.getElementById('reload').value, {SAFE_FOR_JQUERY: true});
+	var first = DOMPurify.sanitize(document.getElementById('first').value, {SAFE_FOR_JQUERY: true});
+	var scroll = DOMPurify.sanitize(document.getElementById('scroll').value, {SAFE_FOR_JQUERY: true});
+	var sfw = DOMPurify.sanitize(document.getElementById('sfw').value, {SAFE_FOR_JQUERY: true});
 	chrome.storage.sync.set({
 		show: show,
 		color: color,
@@ -53,21 +53,8 @@ function restore_options() {
 	});
 }
 
-/*function reset() {
-	localStorage.clear();
-	localStorage["color"] = "0000FF";
-	restore_options();
-	// Update status to let user know options were saved.
-	var status = document.getElementById("status");
-	status.innerHTML = "Options Saved.";
-	setTimeout(function() {
-		status.innerHTML = "";
-	}, 750);
-}*/
-
 document.addEventListener('DOMContentLoaded', function() {
 	jscolor.init();
 	restore_options();
 });
 document.getElementById('saveBtn').addEventListener('click', save_options);
-//document.getElementById('resetBtn').addEventListener('click', reset);

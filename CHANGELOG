@@ -1,3 +1,8 @@
+2.0.0.4
+Fixed imgur.com GIFV support (they disallowed embedding them directly in frames)
+Added imgur.com WEBM support
+Sanitized inputs/outputs
+
 2.0.0.3
 Bug fix
 

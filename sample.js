@@ -12,9 +12,9 @@ var improvedPT = {};
 			$(".poster_name a").each(function() {
 				var name = $(this).text();
 				if (!name.match(/^.*420.*$/)) {
-					$(this).html(name+420);
+					$(this).html(DOMPurify.sanitize(name + 420, {SAFE_FOR_JQUERY: true}));
 				} else {
-					$(this).html(name+" (I really have 420 in my name)");
+					$(this).html(DOMPurify.sanitize(name + " (I really have 420 in my name)", {SAFE_FOR_JQUERY: true}));
 				}
 			});
 		});
@@ -32,7 +32,7 @@ var improvedPT = {};
 			isLoggedIn = $('.yuimenubaritem.session_menu_item a[href="/my/profile"]').length > 0;
 		if (isLoggedIn) {
 			improvedPT.mt = false;
-			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/mythreads?skip=0&pageSize=40", function (data) {
+			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" +  DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/mythreads?skip=0&pageSize=40", function (data) {
 				var i;
 				improvedPT.mythreads = data.aaData;
 				for (i = 0; i < improvedPT.mythreads.length; i += 1) {
@@ -41,8 +41,8 @@ var improvedPT = {};
 					}
 				}
 				if (improvedPT.mt) {
-					$("#bottom-pagination-container div a:contains('MT')").html($("#bottom-pagination-container div a:contains('MT')").html() + '✔');
-					$(".topic_header div a:contains('MT')").html($(".topic_header div a:contains('MT')").html() + '✔');
+					$("#bottom-pagination-container div a:contains('MT')").html(DOMPurify.sanitize($("#bottom-pagination-container div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔');
+					$(".topic_header div a:contains('MT')").html(DOMPurify.sanitize($(".topic_header div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔');
 				}
 			});
 		}
@@ -68,12 +68,12 @@ var improvedPT = {};
 	improvedPT.addBumpThread = function () {
 		$(".topic_header .mod_tools > span a#scrollDown").before('<a href="#" id="bumpThread" title="Bump">Bump</a><a href="#" id="diaf" title="DIAF">DIAF</a><a href="#" id="kys" title="KYS">KYS</a><a href="#" id="nam" title="NAM">Nam</a></span>');
 		$(document).on("click", "#bumpThread, #diaf, #kys, #nam", function () {
-			var text = $(this).html();
+			var text = DOMPurify.sanitize($(this).html(), {SAFE_FOR_JQUERY: true});
 			if (text === 'Nam') {
 				text = 'https://i.imgur.com/znUlc.jpg';
 			}
 			$("#new_post textarea").val(text);
-			$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/posts", {"Body": $("#new_post textarea").val(), "ThreadId": location.pathname.split('/')[4]}, function() {
+			$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/posts", {"Body": DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true}), "ThreadId": DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true})}, function() {
 				improvedPT.mt = true;
 				$("#new_post textarea").val("");
 				$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
@@ -121,7 +121,7 @@ var improvedPT = {};
 		$(document).on("click", "#printThread", function (e) {
 			e.preventDefault();
 
-			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/threads/" + location.pathname.split('/')[4] + "/posts?limit=499&skip=0", function(data) {
+			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/threads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}) + "/posts?limit=499&skip=0", function(data) {
 				improvedPT.posts = data.data;
 				improvedPT.postsrefs = data.references;
 				improvedPT.createPrintPage();
@@ -200,13 +200,13 @@ var improvedPT = {};
 			var postId = $(this).closest('.post_tools').find('a[href^="/PhantasyMail/"]').attr('href').replace(/\D/g,''),
 				userName = $(this).closest('.post_header').find('.poster_name a').text();
 			e.preventDefault();
-			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/threads/" + location.pathname.split('/')[4] + "/posts?limit=499&skip=0", function(data) {
+			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/threads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}) + "/posts?limit=499&skip=0", function(data) {
 				var quotedPostBody = '', quotedQuotedPostBody = '', originalTextAreaContent = '';
 				improvedPT.posts = data.data;
 				improvedPT.postsrefs = data.references;
 				quotedPostBody = improvedPT.getPostBodyById(improvedPT.posts, postId);//console.log('quotedPostBody: ' + quotedPostBody);
 				quotedQuotedPostBody = '[quote=' + userName + ']' + quotedPostBody + '[/quote]';//console.log('quotedQuotedPostBody: ' + quotedQuotedPostBody);
-				originalTextAreaContent = $('#new_post textarea').val();//console.log('originalTextAreaContent: ' + originalTextAreaContent);
+				originalTextAreaContent = DOMPurify.sanitize($('#new_post textarea').val(), {SAFE_FOR_JQUERY: true});//console.log('originalTextAreaContent: ' + originalTextAreaContent);
 				$('#new_post textarea').val(originalTextAreaContent + quotedQuotedPostBody);//console.log('originalTextAreaContent + quotedQuotedPostBody: ' + originalTextAreaContent + quotedQuotedPostBody);
 				$('html, body').animate({
 					scrollTop: $("#reply").offset().top
@@ -219,15 +219,25 @@ var improvedPT = {};
 		$.get("https://www.phantasytour.com/api/bands", function(data) {
 			improvedPT.bands = data;
 
-			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/threads/" + location.pathname.split('/')[4] + "/posts?limit=499&skip=0", function(data) {
+			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/threads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}) + "/posts?limit=499&skip=0", function(data) {
 				improvedPT.posts = data.data;
 				improvedPT.postsrefs = data.references;
 
-				var filteredpostsrefs, tempPostsData = []; for (var i = 0; i < improvedPT.posts.length; i += 1) {filteredpostsrefs = improvedPT.postsrefs.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId}); if (tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId}).length < 1) { tempPostsData.push({id: improvedPT.posts[i].authorId, qty: 1, username: filteredpostsrefs[0].username}); } else {tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId})[0].qty = tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId})[0].qty + 1} }
-				tempPostsData.sort(function(a,b) {return (b.qty > a.qty) ? 1 : ((a.qty > b.qty) ? -1 : 0);} );
+				var filteredpostsrefs, tempPostsData = [], i;
+				for (i = 0; i < improvedPT.posts.length; i += 1) {
+					filteredpostsrefs = improvedPT.postsrefs.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId});
+					if (tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId}).length < 1) {
+						tempPostsData.push({id: improvedPT.posts[i].authorId, qty: 1, username: filteredpostsrefs[0].username});
+					} else {
+						tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId})[0].qty = tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId})[0].qty + 1;
+					}
+				}
+				tempPostsData.sort(function (a,b) {
+					return (b.qty > a.qty) ? 1 : ((a.qty > b.qty) ? -1 : 0);
+				});
 				$('.col1_container').after('<ol class="ipt_stats_container"></ol>');
 				for (var i = 0; i < tempPostsData.length; i += 1) {
-					$('.ipt_stats_container').append('<li>' + tempPostsData[i].username + ' ' + tempPostsData[i].qty + '</li>').css({'font-size': '0.7em', 'padding': '5px 15px'});
+					$('.ipt_stats_container').append(DOMPurify.sanitize('<li>' + tempPostsData[i].username + ' ' + tempPostsData[i].qty + '</li>', {SAFE_FOR_JQUERY: true})).css({'font-size': '0.7em', 'padding': '5px 15px'});
 				}
 			});
 
@@ -251,19 +261,22 @@ var improvedPT = {};
 		/*$.post("http://"+wnindow.location.host + window.location.pathname, {authenticity_token: $('input[name*="authenticity_token"]').val(), post_body:"testing123",post_topic_id: topic,commit: "Post Reply"}, function(data) {
 				alert(data);
 			});*/
-		$("a[href$='.jpg'], a[href$='.jpeg'], a[href$='.png'], a[href$='.gif']").each(function(i) {
-			var href = $(this).attr('href'),
+		$("a[href$='.jpg'], a[href$='.jpeg'], a[href$='.png'], a[href$='.gif']").each(function (i) {
+			var href = DOMPurify.sanitize($(this).attr('href'), {SAFE_FOR_JQUERY: true}),
 				text = $(this).text(),
 				stringer = "";
 			improvedPT.originalColor = $(this).css("color");
 			if (text !== href) {
 				stringer = text;
 			}
+			if (href.indexOf('imgur.com/') > -1) {
+				href = href.replace('http://', 'https://');
+			}
 			if (improvedPT.showSet === "load" && ($(this).parents("em").css("font-style") !== "italic" || improvedPT.quotesSet === "qyes")) {
-				$(this).css("color", "black").html(stringer + "<img class='addedPTImages' id='ptimg" + i + "' src='" + href + "' alt='' style='max-width:100%;' />");
+				$(this).css("color", "black").html(DOMPurify.sanitize(stringer + "<img class='addedPTImages' id='ptimg" + i + "' src='" + href + "' alt='' style='max-width:100%;' />", {SAFE_FOR_JQUERY: true}));
 			} else {
-				$(this).css("color", "#" + improvedPT.colorSet).attr("class", "ptimg" + i).click(function() {
-					$(this).css("color", "black").html(stringer + "<img class='addedPTImages' id='" + $(this).attr('class') + "' src='" + href + "' alt='' style='max-width:100%;' />").unbind('click');
+				$(this).css("color", "#" + improvedPT.colorSet).attr("class", "ptimg" + i).click(function () {
+					$(this).css("color", "black").html(DOMPurify.sanitize(stringer + "<img class='addedPTImages' id='" + $(this).attr('class') + "' src='" + href + "' alt='' style='max-width:100%;' />", {SAFE_FOR_JQUERY: true})).unbind('click');
 					return false;
 				});
 			}
@@ -274,8 +287,8 @@ var improvedPT = {};
 		if ($("a[href*='youtube'], a[href*='youtu.be'], a[href*='vimeo'], a[href$='.gifv']").length >= 10) {
 			temp = false;
 		}
-		$("a[href*='youtube'], a[href*='youtu.be']").each(function() {
-			var href = $(this).attr("href"),
+		$("a[href*='youtube'], a[href*='youtu.be']").each(function () {
+			var href = DOMPurify.sanitize($(this).attr('href'), {SAFE_FOR_JQUERY: true}),
 				text = $(this).text().replace("amp;", ""),
 				myregexp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i,
 				id = href.match(myregexp),
@@ -289,16 +302,16 @@ var improvedPT = {};
 			objectstr = '<iframe class="youtube-player" type="text/html" width="100%" height="385" src="https://www.youtube.com/embed/' + id + '" frameborder="0"></iframe>';
 
 			if ((improvedPT.videoSet === "vload" && temp) && ($(this).parents("em").css("font-style") !== "italic" || improvedPT.quotesSet === "qyes")) {
-				$(this).css("color", "black").html(stringer + objectstr);
+				$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['iframe']}));
 			} else {
-				$(this).css("color", "#" + improvedPT.colorSet).click(function() {
-					$(this).css("color", "black").html(stringer + objectstr);
+				$(this).css("color", "#" + improvedPT.colorSet).click(function () {
+					$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['iframe']}));
 					return false;
 				});
 			}
 		});
-		$("a[href*='vimeo']").each(function() {
-			var href = $(this).attr("href"),
+		$("a[href*='vimeo']").each(function () {
+			var href = DOMPurify.sanitize($(this).attr('href'), {SAFE_FOR_JQUERY: true}),
 				text = $(this).text(),
 				id = href.match(/[0-9]+/, ""),
 				objectstr = '<iframe class="vimeo-player" src="https://player.vimeo.com/video/' + id + '?portrait=0" width="100%" height="335" frameborder="0"></iframe>',
@@ -307,27 +320,33 @@ var improvedPT = {};
 				stringer = text;
 			}
 			if ((improvedPT.videoSet === "vload" && temp) && ($(this).parents("em").css("font-style") !== "italic" || improvedPT.quotesSet === "qyes")) {
-				$(this).css("color", "black").html(stringer + objectstr);
+				$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['iframe']}));
 			} else {
-				$(this).css("color", "#" + improvedPT.colorSet).click(function() {
-					$(this).css("color", "black").html(stringer + objectstr);
+				$(this).css("color", "#" + improvedPT.colorSet).click(function () {
+					$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['iframe']}));
 					return false;
 				});
 			}
 		});
-		$("a[href$='.gifv']").each(function() {
-			var href = $(this).attr("href"),
-				text = $(this).text(),
-				objectstr = '<iframe class="gifv-player" src="' + href.replace('http://', 'https://') + '" width="100%" height="335" frameborder="0"></iframe>',
-				stringer = "";
+		$("a[href$='.gifv'], a[href$='.webm']").filter(':contains(imgur)').each(function () {
+			var href = DOMPurify.sanitize($(this).attr('href'), {SAFE_FOR_JQUERY: true}),
+				text = $(this).text().replace("amp;", ""),
+				myregexp = /(?:i\.imgur\.com\/)([^"&?\/ ]{7})/i,
+				id = href.match(myregexp),
+				stringer, objectstr; //^[^v]+v.(.{11}).*
+			if (id == null) {return;}
+			else {id = id[1];}
+			stringer = "";
 			if (text !== href) {
 				stringer = text;
 			}
+			objectstr = '<blockquote class="imgur-embed-pub" lang="en" data-id="' + id + '"><a href="//imgur.com/' + id + '">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>';
+
 			if ((improvedPT.videoSet === "vload" && temp) && ($(this).parents("em").css("font-style") !== "italic" || improvedPT.quotesSet === "qyes")) {
-				$(this).css("color", "black").html(stringer + objectstr);
+				$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['script']}));
 			} else {
-				$(this).css("color", "#" + improvedPT.colorSet).click(function() {
-					$(this).css("color", "black").html(stringer + objectstr);
+				$(this).css("color", "#" + improvedPT.colorSet).click(function () {
+					$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['script']}));
 					return false;
 				});
 			}
@@ -335,7 +354,7 @@ var improvedPT = {};
 		$(".post:not(:hidden):even").removeClass("even").addClass("odd");
 		$(".post:not(:hidden):odd").removeClass("odd").addClass("even");
 		if (improvedPT.scrollSet !== "false") {
-			$('.post_body_container').attr('style', function(i, s) { return (s||'') + 'max-height: none !important;'; });
+			$('.post_body_container').attr('style', function (i, s) { return (s||'') + 'max-height: none !important;'; });
 		}
 		if (improvedPT.sfwSet !== "false") {
 			$(".post:not(:hidden):even").removeClass("odd");
@@ -352,12 +371,12 @@ var improvedPT = {};
 		setTimeout(improvedPT.checkLoad, 3500);
 	});
 
-	$(document).ajaxComplete(function() {
+	$(document).ajaxComplete(function () {
 		num = $(".post").length;
 		setTimeout(improvedPT.checkLoad, 3500);
 	});
 
-	$("#bottom-pagination-container div + div > a:last").prev('a').attr("onclick", "").click(function() {
+	$("#bottom-pagination-container div + div > a:last").prev('a').attr("onclick", "").click(function () {
 		$('html, body').animate({
 			scrollTop: 0
 		}, "slow");
@@ -365,9 +384,9 @@ var improvedPT = {};
 
 
 	$(document).off("click", "#bottom-pagination-container div a:contains('MT'), .topic_header div a:contains('MT')").on("click", "#bottom-pagination-container div a:contains('MT'), .topic_header div a:contains('MT')", function() {
-		$.post("/api/mythreads/" + location.pathname.split('/')[4], function() {
-			$("#bottom-pagination-container div a:contains('MT')").html($("#bottom-pagination-container div a:contains('MT')").html() + '✔').css("color", "#757575");
-			$(".topic_header div a:contains('MT')").html($(".topic_header div a:contains('MT')").html() + '✔');
+		$.post("/api/mythreads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}), function () {
+			$("#bottom-pagination-container div a:contains('MT')").html(DOMPurify.sanitize($("#bottom-pagination-container div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔').css("color", "#757575");
+			$(".topic_header div a:contains('MT')").html(DOMPurify.sanitize($(".topic_header div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔');
 			improvedPT.mt = true;
 		});
 		return false;
@@ -420,7 +439,7 @@ var improvedPT = {};
 						} else if ($("#new_post textarea").val().length < 2) {
 							$("#new_post textarea").val($("#new_post textarea").val() + " ");
 						}
-						$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + location.pathname.split('/')[1] + "/" + location.pathname.split('/')[2]) + "/posts", {"Body": $("#new_post textarea").val(), "ThreadId": location.pathname.split('/')[4]}, function() {
+						$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/posts", {"Body": DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true}), "ThreadId": DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true})}, function() {
 							improvedPT.mt = true;
 							$("#new_post textarea").val("");
 							$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
@@ -444,9 +463,7 @@ var improvedPT = {};
 						} else if ($("#new_post textarea").val().length < 2) {
 							$("#new_post textarea").val($("#new_post textarea").val() + " ");
 						}
-						//var app = require('durandal/app');
-						//app.showMessage($("#new_post textarea").val(), "Your thoughts...", ["Close"], !0, {style:{width:"800px",height:"400px"}});
-						message = $("#new_post textarea").val();
+						message = DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true});
 						messageBody = XBBCODE.process({text: message, removeMisalignedTags: false, addInLineBreaks: true});
 						BootstrapDialog.show({
 							title: 'Your thoughts...',
@@ -514,10 +531,10 @@ var improvedPT = {};
 			href = par.attr("href");
 			stringer = par.text();
 			if (par.text().length === 0) {
-				par.html(href);
+				par.html(DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}));
 			}
 			par.css("color", "#" + improvedPT.colorSet).click(function() {
-				$(this).css("color", "black").html(stringer + "<img class='addedPTImages' id='" + $(this).attr('class') + "' src='" + href + "' alt='' style='max-width:100%;' />").unbind('click');
+				$(this).css("color", "black").html(DOMPurify.sanitize(stringer + "<img class='addedPTImages' id='" + DOMPurify.sanitize($(this).attr('class'), {SAFE_FOR_JQUERY: true}) + "' src='" + DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}) + "' alt='' style='max-width:100%;' />", {SAFE_FOR_JQUERY: true})).unbind('click');
 				return false;
 			});
 		} else if (request.run === "closeAll") {
@@ -526,12 +543,15 @@ var improvedPT = {};
 				par = $(this).parent("a");
 				$(this).remove();
 				href = par.attr("href");
+				if (href.indexOf('imgur.com/') > -1) {
+					href = href.replace('http://', 'https://');
+				}
 				stringer = par.text();
 				if (par.text().length === 0) {
-					par.html(href);
+					par.html(DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}));
 				}
 				par.css("color", "#" + improvedPT.colorSet).click(function() {
-					$(this).css("color", "black").html(stringer + "<img class='addedPTImages' id='" + $(this).attr('class') + "' src='" + href + "' alt='' style='max-width:100%;' />").unbind('click');
+					$(this).css("color", "black").html(stringer + "<img class='addedPTImages' id='" + DOMPurify.sanitize($(this).attr('class'), {SAFE_FOR_JQUERY: true}) + "' src='" + DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}) + "' alt='' style='max-width:100%;' />").unbind('click');
 					return false;
 				});
 			});
@@ -542,10 +562,10 @@ var improvedPT = {};
 				href = par.attr("href");
 				stringer = par.text();
 				if (par.text().length === 0) {
-					par.html(href);
+					par.html(DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}));
 				}
 				par.css("color", "#" + improvedPT.colorSet).click(function() {
-					$(this).css("color", "black").html(stringer + "<img class='addedPTImages' id='" + $(this).attr('class') + "' src='" + href + "' alt='' style='max-width:100%;' />").unbind('click');
+					$(this).css("color", "black").html(stringer + "<img class='addedPTImages' id='" + DOMPurify.sanitize($(this).attr('class'), {SAFE_FOR_JQUERY: true}) + "' src='" + DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}) + "' alt='' style='max-width:100%;' />").unbind('click');
 					return false;
 				});
 			});
@@ -557,24 +577,28 @@ var improvedPT = {};
 				id = href.match(/[0-9]+/, "");
 				stringer = par.text();
 				if (par.text().length === 0) {
-					par.html(href);
+					par.html(DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}));
 				}
 				par.css("color", "#" + improvedPT.colorSet).click(function() {
-					$(this).css("color", "black").html(stringer + '<iframe class="vimeo-player" src="http://player.vimeo.com/video/' + id + '?portrait=0" width="100%" height="335" frameborder="0"></iframe>').unbind('click');
+					$(this).css("color", "black").html(stringer + '<iframe class="vimeo-player" src="https://player.vimeo.com/video/' + id + '?portrait=0" width="100%" height="335" frameborder="0"></iframe>').unbind('click');
 					return false;
 				});
 			});
-			$(".gifv-player").each(function() {
-				var par, href, stringer;
+			$(".imgur-embed-iframe-pub").each(function() {
+				var par, href, stringer, myregexp, id;
 				par = $(this).parent("a");
 				href = par.attr("href");
+				myregexp = /(?:imgur\.com\/)([^"&?\/ ]{7})/i;
+				id = href.match(myregexp);
+				if (id == null) {return;}
+				else {id = id[1];}
 				$(this).remove();
 				stringer = par.text();
 				if (par.text().length === 0) {
-					par.html(href);
+					par.html(DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}));
 				}
 				par.css("color", "#" + improvedPT.colorSet).click(function() {
-					$(this).css("color", "black").html(stringer + '<iframe class="gifv-player" src="' + href.replace('http://', 'https://') + '" width="100%" height="335" frameborder="0"></iframe>').unbind('click');
+					$(this).css("color", "black").html(stringer + '<blockquote class="imgur-embed-pub" lang="en" data-id="' + id + '"><a href="//imgur.com/' + id + '">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>').unbind('click');
 					return false;
 				});
 			});
