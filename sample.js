@@ -361,6 +361,29 @@ var improvedPT = {};
 				});
 			}
 		});
+		$('a[href*="archive.org"]').each(function () {
+			var href = DOMPurify.sanitize($(this).attr('href'), {SAFE_FOR_JQUERY: true}),
+				text = $(this).text().replace("amp;", ""),
+				myregexp = /(?:archive\.org\/details\/)([^"&?\/ \t\r\n]+)/i,
+				id = href.match(myregexp),
+				stringer, objectstr;
+			if (id == null) {return;}
+			else {id = id[1];}
+			stringer = "";
+			if (text !== href) {
+				stringer = text;
+			}
+			objectstr = '<iframe class="archiveorg-player" src="https://archive.org/embed/' + DOMPurify.sanitize(id, {SAFE_FOR_JQUERY: true}) + '&playlist=1&list_height=390" width="500" height="420" frameborder="0" webkitallowfullscreen="true" mozallowfullscreen="true" allowfullscreen></iframe>';
+
+			if ((improvedPT.videoSet === "vload" && temp) && ($(this).parents("em").css("font-style") !== "italic" || improvedPT.quotesSet === "qyes")) {
+				$(this).css("color", "black").html(stringer + objectstr);
+			} else {
+				$(this).css("color", "#" + improvedPT.colorSet).click(function () {
+					$(this).css("color", "black").html(stringer + objectstr);
+					return false;
+				});
+			}
+		});
 		$(".post:not(:hidden):even").removeClass("even").addClass("odd");
 		$(".post:not(:hidden):odd").removeClass("odd").addClass("even");
 		if (improvedPT.scrollSet !== "false") {
@@ -609,6 +632,24 @@ var improvedPT = {};
 				}
 				par.css("color", "#" + improvedPT.colorSet).click(function() {
 					$(this).css("color", "black").html(stringer + '<blockquote class="imgur-embed-pub" lang="en" data-id="' + DOMPurify.sanitize(id, {SAFE_FOR_JQUERY: true}) + '"><a href="//imgur.com/' + DOMPurify.sanitize(id, {SAFE_FOR_JQUERY: true}) + '">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>').unbind('click');
+					return false;
+				});
+			});
+			$(".archiveorg-player").each(function() {
+				var par, href, stringer, myregexp, id;
+				par = $(this).parent("a");
+				href = DOMPurify.sanitize(par.attr("href"), {SAFE_FOR_JQUERY: true});
+				$(this).remove();
+				myregexp = /(?:archive\.org\/details\/)([^"&?\/ \t\r\n]+)/i;
+				id = href.match(myregexp);
+				if (id == null) {return;}
+				else {id = id[1];}
+				stringer = par.text();
+				if (par.text().length === 0) {
+					par.html(DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}));
+				}
+				par.css("color", "#" + improvedPT.colorSet).click(function() {
+					$(this).css("color", "black").html(stringer + '<iframe class="archiveorg-player" src="https://archive.org/embed/' + DOMPurify.sanitize(id, {SAFE_FOR_JQUERY: true}) + '&playlist=1&list_height=390" width="500" height="420" frameborder="0" webkitallowfullscreen="true" mozallowfullscreen="true" allowfullscreen></iframe>').unbind('click');
 					return false;
 				});
 			});
