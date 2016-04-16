@@ -3,11 +3,11 @@
         "scripts": ["background.js"]
     },
     "content_scripts": [{
-        "css": ["bootstrap-dialog.min.css"],
-        "js": ["jquery.min.js", "bootstrap.min.js", "bootstrap-dialog.min.js", "xbbcode.js", "dompurify/purify.min.js", "sample.js"],
+        "css": ["bootstrap/bootstrap-dialog.min.css"],
+        "js": ["jquery/jquery.min.js", "bootstrap/bootstrap.min.js", "bootstrap/bootstrap-dialog.min.js", "xbbcode/xbbcode.min.js", "dompurify/purify.min.js", "sample.js"],
         "matches": ["http://*.phantasytour.com/bands/*/threads/*/*", "https://*.phantasytour.com/bands/*/*threads/*/*"]
     }, {
-        "js": ["jquery.js", "dompurify/purify.min.js", "index.js"],
+        "js": ["jquery/jquery.js", "dompurify/purify.min.js", "index.js"],
         "matches": ["https://*.phantasytour.com/bands/*/threads", "https://*.phantasytour.com/bands/*/threads", "http://*.phantasytour.com/bands/*/threads?mode=MyThreads", "https://*.phantasytour.com/bands/*/threads?mode=MyThreads"]
     }],
     "description": "Improving your PT viewing. Finds all links to images and videos on PT and embeds them in the page.",
@@ -19,13 +19,13 @@
     "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDIupEKnnk0TutjvKXVvHNvBwjqn/mqwHZz9+kaummNUqNCxTgnsKqeskSjEUnUxDrDdi5FU7eGaSTf2qD14Y5X2Ke/zZRnA2pCkf3mkmd/DxpknbtgihI4BHHt8VyFhaEoQhnUVJBtmDskolPz2HjuFwebn2PNuv6SMSFgwkmA6wIDAQAB",
     "name": "Improved PT",
     "options_ui": {
-        "page": "options_ui.html",
+        "page": "options/options_ui.html",
         "chrome_style": true,
         "open_in_tab": true
     },
-    "options_page": "options.html",
+    "options_page": "options/options.html",
     "permissions": ["http://*.phantasytour.com/*", "https://*.phantasytour.com/*", "contextMenus", "tabs", "storage", "activeTab"],
     "update_url": "http://clients2.google.com/service/update2/crx",
-    "version": "2.0.0.4",
+    "version": "2.0.0.5",
     "manifest_version": 2
 }

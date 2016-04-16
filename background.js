@@ -27,7 +27,7 @@ chrome.runtime.onMessage.addListener(
 			chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
 				//var url = "data:text/html," + encodeURIComponent(request.html),
 				var index = tabs[0].index + 1;
-				chrome.tabs.create({index: index, url: chrome.extension.getURL("blankpage.html")}, function (tab) {
+				chrome.tabs.create({index: index, url: chrome.extension.getURL("print/blankpage.html")}, function (tab) {
 					var tableHead = request.tableHead, tableBody = request.tableBody;
 					chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 						if (tabId === tab.id) {

@@ -1,3 +1,6 @@
+2.0.0.5
+Improved rizajj's thread stats
+
 2.0.0.4
 Fixed imgur.com GIFV support (they disallowed embedding them directly in frames)
 Added imgur.com WEBM support

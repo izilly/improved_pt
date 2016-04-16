@@ -21,6 +21,13 @@ var improvedPT = {};
 	}
 	// End April Fools Day
 
+	$.fn.focusToEnd = function() {
+		return this.each(function() {
+			var v = $(this).val();
+			$(this).focus().val("").val(v);
+		});
+	};
+
 	improvedPT.getBandApiUrlByWebUrl = function (bands, webUrl) {
 		var band = bands.filter(function (obj) {
 			return obj.webUrl === webUrl;
@@ -211,6 +218,7 @@ var improvedPT = {};
 				$('html, body').animate({
 					scrollTop: $("#reply").offset().top
 				}, "slow");
+				$('#new_post textarea').focusToEnd();
 			});
 		});
 		$('.add_quote_to_reply').css('cursor', 'pointer');
@@ -223,21 +231,23 @@ var improvedPT = {};
 				improvedPT.posts = data.data;
 				improvedPT.postsrefs = data.references;
 
-				var filteredpostsrefs, tempPostsData = [], i;
+				var filteredpostsrefs, tempPostsData = [], i, totalQty = 0;
 				for (i = 0; i < improvedPT.posts.length; i += 1) {
 					filteredpostsrefs = improvedPT.postsrefs.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId});
 					if (tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId}).length < 1) {
 						tempPostsData.push({id: improvedPT.posts[i].authorId, qty: 1, username: filteredpostsrefs[0].username});
+						totalQty += 1;
 					} else {
 						tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId})[0].qty = tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId})[0].qty + 1;
+						totalQty += 1;
 					}
 				}
 				tempPostsData.sort(function (a,b) {
 					return (b.qty > a.qty) ? 1 : ((a.qty > b.qty) ? -1 : 0);
 				});
-				$('.col1_container').after('<ol class="ipt_stats_container"></ol>');
+				$('.col1_container').after('<div class="ipt_stats_container"><h6>Post Counts</h6><ol></ol></div>');
 				for (var i = 0; i < tempPostsData.length; i += 1) {
-					$('.ipt_stats_container').append(DOMPurify.sanitize('<li>' + tempPostsData[i].username + ' ' + tempPostsData[i].qty + '</li>', {SAFE_FOR_JQUERY: true})).css({'font-size': '0.7em', 'padding': '5px 15px'});
+					$('.ipt_stats_container ol').append(DOMPurify.sanitize('<li>' + tempPostsData[i].username + ' ' + tempPostsData[i].qty + ' (' + (Math.round(((tempPostsData[i].qty / totalQty) * 100) * 100)/100).toFixed(2) + '%)</li>', {SAFE_FOR_JQUERY: true})).css({'font-size': '0.7em', 'padding': '5px 0 5px 25px'}).parent('.ipt_stats_container').css({'background': 'rgba(255,255,255,0.25)', 'margin-top': '5px', '-moz-border-radius': '5px', 'border-radius': '5px'}).find('h6').css({'margin': '0', 'padding': '5px 5px 0 9px'});
 				}
 			});
 
@@ -273,10 +283,10 @@ var improvedPT = {};
 				href = href.replace('http://', 'https://');
 			}
 			if (improvedPT.showSet === "load" && ($(this).parents("em").css("font-style") !== "italic" || improvedPT.quotesSet === "qyes")) {
-				$(this).css("color", "black").html(DOMPurify.sanitize(stringer + "<img class='addedPTImages' id='ptimg" + i + "' src='" + href + "' alt='' style='max-width:100%;' />", {SAFE_FOR_JQUERY: true}));
+				$(this).css("color", "black").html(stringer + "<img class='addedPTImages' id='ptimg" + i + "' src='" + href + "' alt='' style='max-width:100%;' />");
 			} else {
 				$(this).css("color", "#" + improvedPT.colorSet).attr("class", "ptimg" + i).click(function () {
-					$(this).css("color", "black").html(DOMPurify.sanitize(stringer + "<img class='addedPTImages' id='" + $(this).attr('class') + "' src='" + href + "' alt='' style='max-width:100%;' />", {SAFE_FOR_JQUERY: true})).unbind('click');
+					$(this).css("color", "black").html(stringer + "<img class='addedPTImages' id='" + DOMPurify.sanitize($(this).attr('class'), {SAFE_FOR_JQUERY: true}) + "' src='" + href + "' alt='' style='max-width:100%;' />").unbind('click');
 					return false;
 				});
 			}
@@ -299,13 +309,13 @@ var improvedPT = {};
 			if (text !== href) {
 				stringer = text;
 			}
-			objectstr = '<iframe class="youtube-player" type="text/html" width="100%" height="385" src="https://www.youtube.com/embed/' + id + '" frameborder="0"></iframe>';
+			objectstr = '<iframe class="youtube-player" type="text/html" width="100%" height="385" src="https://www.youtube.com/embed/' + DOMPurify.sanitize(id, {SAFE_FOR_JQUERY: true}) + '" frameborder="0"></iframe>';
 
 			if ((improvedPT.videoSet === "vload" && temp) && ($(this).parents("em").css("font-style") !== "italic" || improvedPT.quotesSet === "qyes")) {
-				$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['iframe']}));
+				$(this).css("color", "black").html(stringer + objectstr);
 			} else {
 				$(this).css("color", "#" + improvedPT.colorSet).click(function () {
-					$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['iframe']}));
+					$(this).css("color", "black").html(stringer + objectstr);
 					return false;
 				});
 			}
@@ -314,16 +324,16 @@ var improvedPT = {};
 			var href = DOMPurify.sanitize($(this).attr('href'), {SAFE_FOR_JQUERY: true}),
 				text = $(this).text(),
 				id = href.match(/[0-9]+/, ""),
-				objectstr = '<iframe class="vimeo-player" src="https://player.vimeo.com/video/' + id + '?portrait=0" width="100%" height="335" frameborder="0"></iframe>',
+				objectstr = '<iframe class="vimeo-player" src="https://player.vimeo.com/video/' + DOMPurify.sanitize(id, {SAFE_FOR_JQUERY: true}) + '?portrait=0" width="100%" height="335" frameborder="0"></iframe>',
 				stringer = "";
 			if (text !== href) {
 				stringer = text;
 			}
 			if ((improvedPT.videoSet === "vload" && temp) && ($(this).parents("em").css("font-style") !== "italic" || improvedPT.quotesSet === "qyes")) {
-				$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['iframe']}));
+				$(this).css("color", "black").html(stringer + objectstr);
 			} else {
 				$(this).css("color", "#" + improvedPT.colorSet).click(function () {
-					$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['iframe']}));
+					$(this).css("color", "black").html(stringer + objectstr);
 					return false;
 				});
 			}
@@ -343,10 +353,10 @@ var improvedPT = {};
 			objectstr = '<blockquote class="imgur-embed-pub" lang="en" data-id="' + id + '"><a href="//imgur.com/' + id + '">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>';
 
 			if ((improvedPT.videoSet === "vload" && temp) && ($(this).parents("em").css("font-style") !== "italic" || improvedPT.quotesSet === "qyes")) {
-				$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['script']}));
+				$(this).css("color", "black").html(stringer + objectstr);
 			} else {
 				$(this).css("color", "#" + improvedPT.colorSet).click(function () {
-					$(this).css("color", "black").html(DOMPurify.sanitize(stringer + objectstr, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['script']}));
+					$(this).css("color", "black").html(stringer + objectstr);
 					return false;
 				});
 			}
@@ -542,7 +552,7 @@ var improvedPT = {};
 				var par, href, stringer;
 				par = $(this).parent("a");
 				$(this).remove();
-				href = par.attr("href");
+				href = DOMPurify.sanitize(par.attr("href"), {SAFE_FOR_JQUERY: true});
 				if (href.indexOf('imgur.com/') > -1) {
 					href = href.replace('http://', 'https://');
 				}
@@ -559,7 +569,7 @@ var improvedPT = {};
 				var par, href, stringer;
 				par = $(this).parent("a");
 				$(this).remove();
-				href = par.attr("href");
+				href = DOMPurify.sanitize(par.attr("href"), {SAFE_FOR_JQUERY: true});
 				stringer = par.text();
 				if (par.text().length === 0) {
 					par.html(DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}));
@@ -572,7 +582,7 @@ var improvedPT = {};
 			$(".vimeo-player").each(function() {
 				var par, href, id, stringer;
 				par = $(this).parent("a");
-				href = par.attr("href");
+				href = DOMPurify.sanitize(par.attr("href"), {SAFE_FOR_JQUERY: true});
 				$(this).remove();
 				id = href.match(/[0-9]+/, "");
 				stringer = par.text();
@@ -580,14 +590,14 @@ var improvedPT = {};
 					par.html(DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}));
 				}
 				par.css("color", "#" + improvedPT.colorSet).click(function() {
-					$(this).css("color", "black").html(stringer + '<iframe class="vimeo-player" src="https://player.vimeo.com/video/' + id + '?portrait=0" width="100%" height="335" frameborder="0"></iframe>').unbind('click');
+					$(this).css("color", "black").html(stringer + '<iframe class="vimeo-player" src="https://player.vimeo.com/video/' + DOMPurify.sanitize(id, {SAFE_FOR_JQUERY: true}) + '?portrait=0" width="100%" height="335" frameborder="0"></iframe>').unbind('click');
 					return false;
 				});
 			});
 			$(".imgur-embed-iframe-pub").each(function() {
 				var par, href, stringer, myregexp, id;
 				par = $(this).parent("a");
-				href = par.attr("href");
+				href = DOMPurify.sanitize(par.attr("href"), {SAFE_FOR_JQUERY: true});
 				myregexp = /(?:imgur\.com\/)([^"&?\/ ]{7})/i;
 				id = href.match(myregexp);
 				if (id == null) {return;}
@@ -595,10 +605,10 @@ var improvedPT = {};
 				$(this).remove();
 				stringer = par.text();
 				if (par.text().length === 0) {
-					par.html(DOMPurify.sanitize(href, {SAFE_FOR_JQUERY: true}));
+					par.html(href);
 				}
 				par.css("color", "#" + improvedPT.colorSet).click(function() {
-					$(this).css("color", "black").html(stringer + '<blockquote class="imgur-embed-pub" lang="en" data-id="' + id + '"><a href="//imgur.com/' + id + '">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>').unbind('click');
+					$(this).css("color", "black").html(stringer + '<blockquote class="imgur-embed-pub" lang="en" data-id="' + DOMPurify.sanitize(id, {SAFE_FOR_JQUERY: true}) + '"><a href="//imgur.com/' + DOMPurify.sanitize(id, {SAFE_FOR_JQUERY: true}) + '">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>').unbind('click');
 					return false;
 				});
 			});
