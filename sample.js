@@ -136,7 +136,9 @@ var improvedPT = {};
 		});
 	};
 	improvedPT.addBoldText = function () {
-		$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
+	    $('#new_post textarea').attr('id', 'postbox');
+	    //$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
+		$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
 		$(document).on("click", "#boldText", function (e) {
 			var el = $('#new_post textarea')[0];
 			e.preventDefault();
@@ -164,8 +166,10 @@ var improvedPT = {};
 		});
 	};
 	improvedPT.addLink = function () {
+	    var linkval = document.getElementById('ptlinkurl').value;
+	    if (linkval.substring(0,4) !== "http"){ linkval = "http://" + linkval;}
 		var el = $('#new_post textarea')[0],
-			tte = '[a href="' + document.getElementById('ptlinkurl').value + '"]' + document.getElementById('ptlinktext').value + '[/a]';
+			tte = '[a href="' + linkval + '"]' + document.getElementById('ptlinktext').value + '[/a]';
 		if (document.getElementById('ptlinkitalic').checked) {tte = "[i]" + tte + "[/i]";}
 		if (document.getElementById('ptlinkbold').checked) {tte = "[b]" + tte + "[/b]";}
 		el.value += tte;
@@ -193,6 +197,7 @@ var improvedPT = {};
 					}
 				}]
 			});
+			setTimeout(function(){$('.bootstrap-dialog-footer-buttons .btn-default').attr('onclick', "setTimeout(function(){var root = ko.contextFor(document.getElementById('postbox')).$root;root.newReplyBody(document.getElementById('postbox').value); $('#postbox').change();}, 169)")},169);
 		});
 	};
 	improvedPT.getPostBodyById = function (posts, postId) {
