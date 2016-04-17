@@ -517,6 +517,7 @@ var improvedPT = {};
 						if ($("#new_post textarea").val().length < 1) {
 							errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Body is too short (minimum is 2 characters)</li></ul></div>";
 							$("#applicationHost").after(errorHTML);
+							$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 							return false;
 						} else if ($("#new_post textarea").val().length < 2) {
 							$("#new_post textarea").val($("#new_post textarea").val() + " ");
@@ -524,6 +525,7 @@ var improvedPT = {};
 						if (improvedPT.containsNonAsciiChars($("#new_post textarea").val())) {
 							errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Please remove non-ASCII characters from the Body of your submission and try again</li></ul></div>";
 							$("#applicationHost").after(errorHTML);
+							$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 							return false;
 						}
 						$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/posts", {"Body": DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true}), "ThreadId": DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true})}, function() {
@@ -546,6 +548,7 @@ var improvedPT = {};
 						if ($("#new_post textarea").val().length < 1) {
 							errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Body is too short (minimum is 2 characters)</li></ul></div>";
 							$("#applicationHost").after(errorHTML);
+							$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 							return false;
 						} else if ($("#new_post textarea").val().length < 2) {
 							$("#new_post textarea").val($("#new_post textarea").val() + " ");
@@ -553,6 +556,7 @@ var improvedPT = {};
 						if (improvedPT.containsNonAsciiChars($("#new_post textarea").val())) {
 							errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Please remove non-ASCII characters from the Body of your submission and try again</li></ul></div>";
 							$("#applicationHost").after(errorHTML);
+							$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 							return false;
 						}
 						message = DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true});
