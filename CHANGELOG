@@ -1,3 +1,10 @@
+2.0.0.8
+Experimental Improvements to the "Create Link" tool
+Bug fix for "Close Image" Context Menu command
+
+2.0.0.7
+Added nolxiii's fixes for textarea bugginess
+
 2.0.0.6
 Added experimental archive.org player embedding support
 

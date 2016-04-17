@@ -28,6 +28,27 @@ var improvedPT = {};
 		});
 	};
 
+	$.fn.selectRange = function (start, end) {
+		if(end === undefined) {
+			end = start;
+		}
+		return this.each(function() {
+			var range;
+			if('selectionStart' in this) {
+				this.selectionStart = start;
+				this.selectionEnd = end;
+			} else if(this.setSelectionRange) {
+				this.setSelectionRange(start, end);
+			} else if(this.createTextRange) {
+				range = this.createTextRange();
+				range.collapse(true);
+				range.moveEnd('character', end);
+				range.moveStart('character', start);
+				range.select();
+			}
+		});
+	};
+
 	improvedPT.getBandApiUrlByWebUrl = function (bands, webUrl) {
 		var band = bands.filter(function (obj) {
 			return obj.webUrl === webUrl;
@@ -136,8 +157,8 @@ var improvedPT = {};
 		});
 	};
 	improvedPT.addBoldText = function () {
-	    $('#new_post textarea').attr('id', 'postbox');
-	    //$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
+		$('#new_post textarea').attr('id', 'postbox');
+		//$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
 		$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
 		$(document).on("click", "#boldText", function (e) {
 			var el = $('#new_post textarea')[0];
@@ -166,10 +187,10 @@ var improvedPT = {};
 		});
 	};
 	improvedPT.addLink = function () {
-	    var linkval = document.getElementById('ptlinkurl').value;
-	    if (linkval.substring(0,4) !== "http"){ linkval = "http://" + linkval;}
-		var el = $('#new_post textarea')[0],
-			tte = '[a href="' + linkval + '"]' + document.getElementById('ptlinktext').value + '[/a]';
+		var el, tte, linkval = document.getElementById('ptlinkurl').value;
+		if (linkval.substring(0,4) !== "http"){ linkval = "http://" + linkval;}
+		el = $('#new_post textarea')[0],
+		tte = '[a href="' + linkval + '"]' + document.getElementById('ptlinktext').value + '[/a]';
 		if (document.getElementById('ptlinkitalic').checked) {tte = "[i]" + tte + "[/i]";}
 		if (document.getElementById('ptlinkbold').checked) {tte = "[b]" + tte + "[/b]";}
 		el.value += tte;
@@ -177,16 +198,37 @@ var improvedPT = {};
 		document.getElementById('ptlinktext').value = "";
 	};
 	improvedPT.addLinkBuilder = function () {
-		var linkFormElements = '<div class="form-group"><label for="ptlinkurl">Link URL</label><input id="ptlinkurl" type="text" class="form-control"></div><div class="form-group"><label for="ptlinktext">Link Text</label><input id="ptlinktext" type="text" class="form-control"></div><div class="checkbox" style="float:left;vertical-align:top;margin-top:0;margin-right:15px;"><label><input id="ptlinkbold" type="checkbox">Bold</label></div><div class="checkbox"style="float:left;vertical-align:top;margin-top:0;margin-right:15px;"><label><input id="ptlinkitalic" type="checkbox">Italic</label></div><br>';
 		$(document).on("click", "#createLink", function (e) {
+			var cursorPosA, cursorPosB, textAreaValue, textBefore, textAfter, anchorText = '', linkCode = '', linkFormElements;
 			e.preventDefault();
+			cursorPosA = $('#new_post textarea').prop('selectionStart');
+			cursorPosB = $('#new_post textarea').prop('selectionEnd');
+			textAreaValue = $('#new_post textarea').val();
+			if (cursorPosA !== cursorPosB) {
+				textBefore = textAreaValue.substring(0, cursorPosA);
+				textAfter = textAreaValue.substring(cursorPosB, textAreaValue.length);
+				anchorText = textAreaValue.substring(cursorPosA, cursorPosB);
+			} else {
+				textBefore = textAreaValue.substring(0, cursorPosA);
+				textAfter = textAreaValue.substring(cursorPosA, textAreaValue.length);
+			}
+			linkFormElements = '<div class="form-group"><label for="ptlinkurl">Link URL</label><input id="ptlinkurl" type="text" class="form-control"></div><div class="form-group"><label for="ptlinktext">Link Text</label><input id="ptlinktext" type="text" class="form-control"></div><div class="checkbox" style="float:left;vertical-align:top;margin-top:0;margin-right:15px;"><label><input id="ptlinkbold" type="checkbox">Bold</label></div><div class="checkbox"style="float:left;vertical-align:top;margin-top:0;margin-right:15px;"><label><input id="ptlinkitalic" type="checkbox">Italic</label></div><br>';
 			BootstrapDialog.show({
 				title: 'Create a Link',
 				message: linkFormElements,
+				onshown: function () {
+					$('#ptlinktext').val(anchorText);
+				},
+				onhidden: function (dialogRef) {
+					$('#new_post textarea').focus().selectRange(cursorPosA + linkCode.length);
+				},
 				buttons: [{
 					label: 'Insert Link',
 					action: function (dialogRef) {
-						improvedPT.addLink();
+						linkCode = '[a href="' + $('#ptlinkurl').val() + '"]' + $('#ptlinktext').val() + '[/a]';
+						if (document.getElementById('ptlinkitalic').checked) {linkCode = "[i]" + linkCode + "[/i]";}
+						if (document.getElementById('ptlinkbold').checked) {linkCode = "[b]" + linkCode + "[/b]";}
+						$('#new_post textarea').val(textBefore + linkCode + textAfter);
 						dialogRef.close();
 					}
 				},
@@ -402,6 +444,17 @@ var improvedPT = {};
 	improvedPT.checkLoad = function () {
 		improvedPT.replaceLinks();
 	};
+	improvedPT.checkOc = function (s, y) {
+		var number = 0;
+		while (s.indexOf(y, 0) >= 0) {
+			number++;
+			s = s.replace(y, "");
+		}
+		return number;
+	};
+	improvedPT.containsNonAsciiChars = function (str) {
+		return str.split('').some(function(char) {return char.charCodeAt(0) > 127;});
+	};
 
 	var num;
 	$(document).on("mouseup", "ul.pagination li a, button.load-more-button", function() {
@@ -430,16 +483,7 @@ var improvedPT = {};
 		return false;
 	});
 
-	function checkOc(s, y) {
-		var number = 0;
-		while (s.indexOf(y, 0) >= 0) {
-			number++;
-			s = s.replace(y, "");
-		}
-		return number;
-	}
-
-	$("img").on("mousedown", function() {
+	$(document).on("mousedown", "img", function() {
 		improvedPT.lastele = $(this);
 	});
 	$(document).ready(function() {
@@ -465,7 +509,7 @@ var improvedPT = {};
 						e.preventDefault;
 						$(this).val("Posting...").attr('disabled', 'disabled');
 						$("#errorExplanation").remove();
-						if (checkOc($("#new_post textarea").val(), "quote") > 8) {
+						if (improvedPT.checkOc($("#new_post textarea").val(), "quote") > 8) {
 							$("#applicationHost").after('<div class="errorExplanation" id="errorExplanation"><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>You cannot have more than 4 quotes.</li></ul></div>');
 							$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 							return false;
@@ -476,6 +520,11 @@ var improvedPT = {};
 							return false;
 						} else if ($("#new_post textarea").val().length < 2) {
 							$("#new_post textarea").val($("#new_post textarea").val() + " ");
+						}
+						if (improvedPT.containsNonAsciiChars($("#new_post textarea").val())) {
+							errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Please remove non-ASCII characters from the Body of your submission and try again</li></ul></div>";
+							$("#applicationHost").after(errorHTML);
+							return false;
 						}
 						$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/posts", {"Body": DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true}), "ThreadId": DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true})}, function() {
 							improvedPT.mt = true;
@@ -489,7 +538,7 @@ var improvedPT = {};
 						e.preventDefault;
 						$(this).val("Previewing...").attr('disabled', 'disabled');
 						$("#errorExplanation").remove();
-						if (checkOc($("#new_post textarea").val(), "quote") > 8) {
+						if (improvedPT.checkOc($("#new_post textarea").val(), "quote") > 8) {
 							$("#applicationHost").after('<div class="errorExplanation" id="errorExplanation"><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>You cannot have more than 4 quotes.</li></ul></div>');
 							$('#previewReplyBtn').val("Preview").removeAttr("disabled");
 							return false;
@@ -500,6 +549,11 @@ var improvedPT = {};
 							return false;
 						} else if ($("#new_post textarea").val().length < 2) {
 							$("#new_post textarea").val($("#new_post textarea").val() + " ");
+						}
+						if (improvedPT.containsNonAsciiChars($("#new_post textarea").val())) {
+							errorHTML = "<div class='errorExplanation' id='errorExplanation'><h2>1 error prohibited this post from being saved</h2><p>There were problems with the following fields:</p><ul><li>Please remove non-ASCII characters from the Body of your submission and try again</li></ul></div>";
+							$("#applicationHost").after(errorHTML);
+							return false;
 						}
 						message = DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true});
 						messageBody = XBBCODE.process({text: message, removeMisalignedTags: false, addInLineBreaks: true});

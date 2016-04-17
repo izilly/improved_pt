@@ -5,7 +5,7 @@ chrome.runtime.onMessage.addListener(
 				show: 'click',
 				color: '0000FF',
 				quotes: 'qno',
-				video: 'vload',
+				video: 'vclick',
 				reload: 'true',
 				scroll: 'true',
 				sfw: 'false'
@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener(
 			return true;
 		} else if (request.set === "index") {//console.log('background.js received index request');
 			chrome.storage.sync.get({
-				first: 'true',
+				first: 'false',
 				sfw: 'false'
 			},
 			function(items) {

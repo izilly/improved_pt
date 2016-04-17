@@ -35,7 +35,7 @@ function restore_options() {
 		show: 'click',
 		color: '0000FF',
 		quotes: 'qno',
-		video: 'vload',
+		video: 'vclick',
 		reload: 'true',
 		first: 'false',
 		scroll: 'true',
