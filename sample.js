@@ -186,24 +186,13 @@ var improvedPT = {};
 			}
 		});
 	};
-	improvedPT.addLink = function () {
-		var el, tte, linkval = document.getElementById('ptlinkurl').value;
-		if (linkval.substring(0,4) !== "http"){ linkval = "http://" + linkval;}
-		el = $('#new_post textarea')[0],
-		tte = '[a href="' + linkval + '"]' + document.getElementById('ptlinktext').value + '[/a]';
-		if (document.getElementById('ptlinkitalic').checked) {tte = "[i]" + tte + "[/i]";}
-		if (document.getElementById('ptlinkbold').checked) {tte = "[b]" + tte + "[/b]";}
-		el.value += tte;
-		document.getElementById('ptlinkurl').value = "";
-		document.getElementById('ptlinktext').value = "";
-	};
 	improvedPT.addLinkBuilder = function () {
 		$(document).on("click", "#createLink", function (e) {
 			var cursorPosA, cursorPosB, textAreaValue, textBefore, textAfter, anchorText = '', linkCode = '', linkFormElements;
 			e.preventDefault();
 			cursorPosA = $('#new_post textarea').prop('selectionStart');
 			cursorPosB = $('#new_post textarea').prop('selectionEnd');
-			textAreaValue = $('#new_post textarea').val();
+			textAreaValue = DOMPurify.sanitize($('#new_post textarea').val(), {SAFE_FOR_JQUERY: true});
 			if (cursorPosA !== cursorPosB) {
 				textBefore = textAreaValue.substring(0, cursorPosA);
 				textAfter = textAreaValue.substring(cursorPosB, textAreaValue.length);
@@ -225,7 +214,7 @@ var improvedPT = {};
 				buttons: [{
 					label: 'Insert Link',
 					action: function (dialogRef) {
-						linkCode = '[a href="' + $('#ptlinkurl').val() + '"]' + $('#ptlinktext').val() + '[/a]';
+						linkCode = '[a href="' + DOMPurify.sanitize($('#ptlinkurl').val(), {SAFE_FOR_JQUERY: true}) + '"]' + DOMPurify.sanitize($('#ptlinktext').val(), {SAFE_FOR_JQUERY: true}) + '[/a]';
 						if (document.getElementById('ptlinkitalic').checked) {linkCode = "[i]" + linkCode + "[/i]";}
 						if (document.getElementById('ptlinkbold').checked) {linkCode = "[b]" + linkCode + "[/b]";}
 						$('#new_post textarea').val(textBefore + linkCode + textAfter);
@@ -442,7 +431,9 @@ var improvedPT = {};
 		}
 	};
 	improvedPT.checkLoad = function () {
-		improvedPT.replaceLinks();
+		if ($(".post").length !== improvedPT.num) {
+			improvedPT.replaceLinks();
+		}
 	};
 	improvedPT.checkOc = function (s, y) {
 		var number = 0;
@@ -456,14 +447,13 @@ var improvedPT = {};
 		return str.split('').some(function(char) {return char.charCodeAt(0) > 127;});
 	};
 
-	var num;
 	$(document).on("mouseup", "ul.pagination li a, button.load-more-button", function() {
-		num = $(".post").length;
+		improvedPT.num = $(".post").length;
 		setTimeout(improvedPT.checkLoad, 3500);
 	});
 
 	$(document).ajaxComplete(function () {
-		num = $(".post").length;
+		improvedPT.num = $(".post").length;
 		setTimeout(improvedPT.checkLoad, 3500);
 	});
 
@@ -564,6 +554,9 @@ var improvedPT = {};
 						BootstrapDialog.show({
 							title: 'Your thoughts...',
 							message: messageBody.html,
+							onshown: function () {
+								$('.bootstrap-dialog-message').linkify({target: '_blank'});
+							},
 							onhide: function () {
 								$('#previewReplyBtn').val("Preview").removeAttr("disabled");
 							},

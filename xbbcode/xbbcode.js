@@ -485,7 +485,7 @@ var XBBCODE = (function() {
             },
             restrictChildrenTo: ["*", "li"]
         },
-        "url": {
+        "a": {
             openTag: function(params,content) {
 
                 var myUrl;
@@ -494,6 +494,8 @@ var XBBCODE = (function() {
                     myUrl = content.replace(/<.*?>/g,"");
                 } else {
                     myUrl = params.substr(1);
+                    myUrl = myUrl.replace(/[ "]/g, '');
+                    myUrl = myUrl.replace('href=', '');
                 }
 
                 urlPattern.lastIndex = 0;
@@ -501,7 +503,7 @@ var XBBCODE = (function() {
                     myUrl = "#";
                 }
 
-                return '<a href="' + myUrl + '">';
+                return '<a href="' + myUrl + '" target="_blank">';
             },
             closeTag: function(params,content) {
                 return '</a>';

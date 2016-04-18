@@ -56,5 +56,7 @@ function restore_options() {
 document.addEventListener('DOMContentLoaded', function() {
 	jscolor.init();
 	restore_options();
+	document.getElementById('color').focus();
+	document.getElementById('color').blur();
 });
 document.getElementById('saveBtn').addEventListener('click', save_options);
