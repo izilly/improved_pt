@@ -431,9 +431,9 @@ var improvedPT = {};
 		}
 	};
 	improvedPT.checkLoad = function () {
-		if ($(".post").length !== improvedPT.num) {
+		//if ($(".post").length !== improvedPT.num) {
 			improvedPT.replaceLinks();
-		}
+		//}
 	};
 	improvedPT.checkOc = function (s, y) {
 		var number = 0;
