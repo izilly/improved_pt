@@ -11,5 +11,5 @@
     "trailing": true,
     "undef": true,
     "unused": true,
-    "predef": [ "chrome", "jQuery", "BootstrapDialog", "XBBCODE" ]
+    "predef": [ "chrome", "jQuery", "BootstrapDialog", "XBBCODE", "DOMPurify" ]
 }

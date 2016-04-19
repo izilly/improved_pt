@@ -62,8 +62,8 @@ var improvedPT = {};
 						var node = mutation.addedNodes[i];
 						if (isMatchFunc(node)) {
 							handlerFunc(node);
-							if (disconnectAfterMatch) observer.disconnect();
-						};
+							if (disconnectAfterMatch) {observer.disconnect();}
+						}
 					}
 				}
 			});
@@ -77,13 +77,12 @@ var improvedPT = {};
 	return observer;
 	}
 
-	// Example
 	var delayedCallToPTTheadPostsLoaded, detectPTPostLoad = waitForMutation(
 		document.querySelector("#applicationHost"),
 		function(node) {
 			if (node.nodeType === 1) { return node.querySelector("div > div > div.post") !== null;} else {return false;}
 		},
-		function(node) {
+		function() {
 			clearTimeout(delayedCallToPTTheadPostsLoaded);
 			delayedCallToPTTheadPostsLoaded = setTimeout(function () {
 				var event = document.createEvent('Event');
@@ -213,7 +212,7 @@ var improvedPT = {};
 			$('#new_post textarea').attr('id', 'postbox');
 			//$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
 			$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
-			$(document).on("click", "#boldText", function (e) {
+			$(document).off("click", "#boldText").on("click", "#boldText", function (e) {
 				var el = $('#new_post textarea')[0];
 				e.preventDefault();
 				if (el.setSelectionRange) {
@@ -223,7 +222,7 @@ var improvedPT = {};
 		}
 	};
 	improvedPT.addItalicText = function () {
-		$(document).on("click", "#italicText", function (e) {
+		$(document).off("click", "#italicText").on("click", "#italicText", function (e) {
 			var el = $('#new_post textarea')[0];
 			e.preventDefault();
 			if (el.setSelectionRange) {
@@ -232,7 +231,7 @@ var improvedPT = {};
 		});
 	};
 	improvedPT.addBoldItalicText = function () {
-		$(document).on("click", "#boldItalicText", function (e) {
+		$(document).off("click", "#boldItalicText").on("click", "#boldItalicText", function (e) {
 			var el = $('#new_post textarea')[0];
 			e.preventDefault();
 			if (el.setSelectionRange) {
@@ -241,7 +240,7 @@ var improvedPT = {};
 		});
 	};
 	improvedPT.addLinkBuilder = function () {
-		$(document).on("click", "#createLink", function (e) {
+		$(document).off("click", "#createLink").on("click", "#createLink", function (e) {
 			var cursorPosA, cursorPosB, textAreaValue, textBefore, textAfter, anchorText = '', linkCode = '', linkFormElements;
 			e.preventDefault();
 			cursorPosA = $('#new_post textarea').prop('selectionStart');
@@ -262,7 +261,7 @@ var improvedPT = {};
 				onshown: function () {
 					$('#ptlinktext').val(anchorText);
 				},
-				onhidden: function (dialogRef) {
+				onhidden: function () {
 					$('#new_post textarea').focus().selectRange(cursorPosA + linkCode.length);
 				},
 				buttons: [{
@@ -282,7 +281,7 @@ var improvedPT = {};
 					}
 				}]
 			});
-			setTimeout(function(){$('.bootstrap-dialog-footer-buttons .btn-default').attr('onclick', "setTimeout(function(){var root = ko.contextFor(document.getElementById('postbox')).$root;root.newReplyBody(document.getElementById('postbox').value); $('#postbox').change();}, 169)")},169);
+			setTimeout(function(){$('.bootstrap-dialog-footer-buttons .btn-default').attr('onclick', "setTimeout(function(){var root = ko.contextFor(document.getElementById('postbox')).$root;root.newReplyBody(document.getElementById('postbox').value); $('#postbox').change();}, 169)");},169);
 		});
 	};
 	improvedPT.getPostBodyById = function (posts, postId) {
@@ -336,7 +335,7 @@ var improvedPT = {};
 					return (b.qty > a.qty) ? 1 : ((a.qty > b.qty) ? -1 : 0);
 				});
 				$('.col1_container').after('<div class="ipt_stats_container"><h6>Post Counts</h6><ol></ol></div>');
-				for (var i = 0; i < tempPostsData.length; i += 1) {
+				for (i = 0; i < tempPostsData.length; i += 1) {
 					$('.ipt_stats_container ol').append(DOMPurify.sanitize('<li>' + tempPostsData[i].username + ' ' + tempPostsData[i].qty + ' (' + (Math.round(((tempPostsData[i].qty / totalQty) * 100) * 100)/100).toFixed(2) + '%)</li>', {SAFE_FOR_JQUERY: true})).css({'font-size': '0.7em', 'padding': '5px 0 5px 25px'}).parent('.ipt_stats_container').css({'background': 'rgba(255,255,255,0.25)', 'margin-top': '5px', '-moz-border-radius': '5px', 'border-radius': '5px'}).find('h6').css({'margin': '0', 'padding': '5px 5px 0 9px'});
 				}
 			}
@@ -504,6 +503,9 @@ var improvedPT = {};
 	};
 	$(document).ready(function() {
 		improvedPT.getBands();
+	});
+	$(document).on('unload', function () {
+		if(typeof detectPTPostLoad !== 'undefined') {detectPTPostLoad.disconnect();}
 	});
 	$(document).off("click", "#bottom-pagination-container div a:contains('MT'), .topic_header div a:contains('MT')").on("click", "#bottom-pagination-container div a:contains('MT'), .topic_header div a:contains('MT')", function() {
 		$.post("/api/mythreads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}), function () {
