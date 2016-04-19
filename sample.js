@@ -143,8 +143,8 @@ var improvedPT = {};
 	};
 	improvedPT.addBumpThread = function () {
 		if ($('#bumpThread').length < 1) {
-			$(".topic_header .mod_tools > span a#scrollDown").before('<a href="#" id="bumpThread" title="Bump">Bump</a><a href="#" id="diaf" title="DIAF">DIAF</a><a href="#" id="kys" title="KYS">KYS</a><a href="#" id="nam" title="NAM">Nam</a></span>');
-			$(document).on("click", "#bumpThread, #diaf, #kys, #nam", function () {
+			$(".topic_header .mod_tools > span a#scrollDown").before('<a href="#" id="bumpThread" title="Bump">Bump</a><a href="#" id="diaf" title="DIAF">DIAF</a><a href="#" id="lys" title="LYS">LYS</a><a href="#" id="kys" title="KYS">KYS</a><a href="#" id="nam" title="NAM">Nam</a></span>');
+			$(document).on("click", "#bumpThread, #diaf, #lys, #kys, #nam", function () {
 				var text = DOMPurify.sanitize($(this).html(), {SAFE_FOR_JQUERY: true});
 				if (text === 'Nam') {
 					text = 'https://i.imgur.com/znUlc.jpg';
