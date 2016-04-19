@@ -1,3 +1,11 @@
+2.0.1.2
+Cleaned up code some more
+Created new event for more reliably and quickly detecting when posts have been added to the page (removed a bunch of setTimeouts)
+Added a 'Quote with "This" in Reply' button to each post
+
+2.0.1.1
+Eghgh... more improvements
+
 2.0.1.0
 Eghgh... more improvements
 

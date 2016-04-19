@@ -49,6 +49,52 @@ var improvedPT = {};
 		});
 	};
 
+	function waitForMutation(parentNode, isMatchFunc, handlerFunc, observeSubtree, disconnectAfterMatch) {
+		var defaultIfUndefined = function(val, defaultVal) {
+			return (typeof val === "undefined") ? defaultVal : val;
+		};
+		observeSubtree = defaultIfUndefined(observeSubtree, false);
+		disconnectAfterMatch = defaultIfUndefined(disconnectAfterMatch, false);
+		var observer = new MutationObserver(function(mutations) {
+			mutations.forEach(function(mutation) {
+				if (mutation.addedNodes) {
+					for (var i = 0; i < mutation.addedNodes.length; i++) {
+						var node = mutation.addedNodes[i];
+						if (isMatchFunc(node)) {
+							handlerFunc(node);
+							if (disconnectAfterMatch) observer.disconnect();
+						};
+					}
+				}
+			});
+		});
+		observer.observe(parentNode, {
+			childList: true,
+			attributes: false,
+			characterData: false,
+			subtree: observeSubtree
+		});
+	return observer;
+	}
+
+	// Example
+	var delayedCallToPTTheadPostsLoaded, detectPTPostLoad = waitForMutation(
+		document.querySelector("#applicationHost"),
+		function(node) {
+			if (node.nodeType === 1) { return node.querySelector("div > div > div.post") !== null;} else {return false;}
+		},
+		function(node) {
+			clearTimeout(delayedCallToPTTheadPostsLoaded);
+			delayedCallToPTTheadPostsLoaded = setTimeout(function () {
+				var event = document.createEvent('Event');
+				event.initEvent('pt-thread-posts-loaded', true, true); //can bubble, and is cancellable
+				document.dispatchEvent(event);
+			}, 250);
+		},
+		true,
+		false
+	);
+
 	improvedPT.getBandApiUrlByWebUrl = function (bands, webUrl) {
 		var band = bands.filter(function (obj) {
 			return obj.webUrl === webUrl;
@@ -69,45 +115,49 @@ var improvedPT = {};
 					}
 				}
 				if (improvedPT.mt) {
-					$("#bottom-pagination-container div a:contains('MT')").html(DOMPurify.sanitize($("#bottom-pagination-container div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔');
-					$(".topic_header div a:contains('MT')").html(DOMPurify.sanitize($(".topic_header div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔');
+					if ($('#bottom-pagination-container div a:contains("✔")').length < 1) {
+						$("#bottom-pagination-container div a:contains('MT')").html(DOMPurify.sanitize($("#bottom-pagination-container div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔');
+					}
+					if ($('.topic_header div a:contains("✔")').length < 1) {
+						$(".topic_header div a:contains('MT')").html(DOMPurify.sanitize($(".topic_header div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔');
+					}
 				}
 			});
 		}
 	};
 	improvedPT.addScrollDown = function () {
-		$(".topic_header .mod_tools > a:last").after('<span class="usr_tools"><a href="#" id="scrollDown" title="Go Down">Down</a></span>');
+		if ($('#scrollDown').length < 1) {
+			$(".topic_header .mod_tools > a:last").after('<span class="usr_tools"><a href="#" id="scrollDown" title="Go Down">Down</a></span>');
 
-		$(document).on("click", "#scrollDown", function (e) {
-			e.preventDefault();
-			$('html, body').animate({
-				scrollTop: $("#applicationHost").height()
-			}, "slow");
-		});
+			$(document).on("click", "#scrollDown", function (e) {
+				e.preventDefault();
+				$('html, body').animate({
+					scrollTop: $("#applicationHost").height()
+				}, "slow");
+			});
+		}
 	};
 	improvedPT.afterAjax = function () {
 		$('button.btn.btn-default.btn-large.load-more-button').click();
-		setTimeout(improvedPT.enableQuoteOverride, 2500);
+		//setTimeout(improvedPT.enableQuoteOverride, 2500);
 	};
-	$(document).off("click", "#bottom-pagination-container div + div > a:last").on("click", "#bottom-pagination-container div + div > a:last", function() {
-		improvedPT.afterAjax();
-		return false;
-	});
 	improvedPT.addBumpThread = function () {
-		$(".topic_header .mod_tools > span a#scrollDown").before('<a href="#" id="bumpThread" title="Bump">Bump</a><a href="#" id="diaf" title="DIAF">DIAF</a><a href="#" id="kys" title="KYS">KYS</a><a href="#" id="nam" title="NAM">Nam</a></span>');
-		$(document).on("click", "#bumpThread, #diaf, #kys, #nam", function () {
-			var text = DOMPurify.sanitize($(this).html(), {SAFE_FOR_JQUERY: true});
-			if (text === 'Nam') {
-				text = 'https://i.imgur.com/znUlc.jpg';
-			}
-			$("#new_post textarea").val(text);
-			$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/posts", {"Body": DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true}), "ThreadId": DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true})}, function() {
-				improvedPT.mt = true;
-				$("#new_post textarea").val("");
-				$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
-				improvedPT.afterAjax();
+		if ($('#bumpThread').length < 1) {
+			$(".topic_header .mod_tools > span a#scrollDown").before('<a href="#" id="bumpThread" title="Bump">Bump</a><a href="#" id="diaf" title="DIAF">DIAF</a><a href="#" id="kys" title="KYS">KYS</a><a href="#" id="nam" title="NAM">Nam</a></span>');
+			$(document).on("click", "#bumpThread, #diaf, #kys, #nam", function () {
+				var text = DOMPurify.sanitize($(this).html(), {SAFE_FOR_JQUERY: true});
+				if (text === 'Nam') {
+					text = 'https://i.imgur.com/znUlc.jpg';
+				}
+				$("#new_post textarea").val(text);
+				$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/posts", {"Body": DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true}), "ThreadId": DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true})}, function() {
+					improvedPT.mt = true;
+					$("#new_post textarea").val("");
+					$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
+					improvedPT.afterAjax();
+				});
 			});
-		});
+		}
 	};
 	improvedPT.filterByAuthorID = function (obj) {
 		return obj.id === parseInt(this.authorId, 10);
@@ -144,29 +194,33 @@ var improvedPT = {};
 		improvedPT.createTabForPrint(tableHead, tableBody);
 	};
 	improvedPT.addPrintThread = function () {
-		$(".topic_header .mod_tools > span a#scrollDown").after('<a href="#" id="printThread" title="Print Thread">Print</a>');
-		
-		$(document).on("click", "#printThread", function (e) {
-			e.preventDefault();
+		if ($('#printThread').length < 1) {
+			$(".topic_header .mod_tools > span a#scrollDown").after('<a href="#" id="printThread" title="Print Thread">Print</a>');
+			
+			$(document).on("click", "#printThread", function (e) {
+				e.preventDefault();
 
-			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/threads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}) + "/posts?limit=499&skip=0", function(data) {
-				improvedPT.posts = data.data;
-				improvedPT.postsrefs = data.references;
-				improvedPT.createPrintPage();
+				$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/threads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}) + "/posts?limit=499&skip=0", function(data) {
+					improvedPT.posts = data.data;
+					improvedPT.postsrefs = data.references;
+					improvedPT.createPrintPage();
+				});
 			});
-		});
+		}
 	};
 	improvedPT.addBoldText = function () {
-		$('#new_post textarea').attr('id', 'postbox');
-		//$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
-		$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
-		$(document).on("click", "#boldText", function (e) {
-			var el = $('#new_post textarea')[0];
-			e.preventDefault();
-			if (el.setSelectionRange) {
-				el.value = el.value.substring(0,el.selectionStart) + "[b]" + el.value.substring(el.selectionStart,el.selectionEnd) + "[/b]" + el.value.substring(el.selectionEnd,el.value.length);
-			}
-		});
+		if ($('#boldText').length < 1) {
+			$('#new_post textarea').attr('id', 'postbox');
+			//$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
+			$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
+			$(document).on("click", "#boldText", function (e) {
+				var el = $('#new_post textarea')[0];
+				e.preventDefault();
+				if (el.setSelectionRange) {
+					el.value = el.value.substring(0,el.selectionStart) + "[b]" + el.value.substring(el.selectionStart,el.selectionEnd) + "[/b]" + el.value.substring(el.selectionEnd,el.value.length);
+				}
+			});
+		}
 	};
 	improvedPT.addItalicText = function () {
 		$(document).on("click", "#italicText", function (e) {
@@ -238,10 +292,11 @@ var improvedPT = {};
 		return post[0].body;
 	};
 	improvedPT.enableQuoteOverride = function () {
-		$('a[href="#reply"]').parent('span').html('').html('<a class="add_quote_to_reply" title="Quote Post In Reply"><img src="/Content/images/sprites/quote.png"></a>');
-		$(document).off('click', '.add_quote_to_reply').on('click', '.add_quote_to_reply', function (e) {
+		$('a[href="#reply"]').parent('span').html('').html('<a class="add_quote_to_reply" title="Quote Post In Reply"><img src="/Content/images/sprites/quote.png"></a>').after('<span><a class="add_quote_with_this_to_reply" title=\'Quote Post With "This" In Reply\'><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4AQTBx0bHfpc5gAAAPhJREFUOMvd06GOwkAQBuB/L7Q7TWpw1DWkpooET1JTga/kuaobnoAH4AFIcKgmrajAYVjT3VX/uSYcnAF19yfjJl8mkxkFgCLi8Uacc3omIt5aq98BoijyX/gw/xk4HA4IggBKKSRJgr7vXzeKiOOPHI9Haq0JYKo0TXm9Xh/6RMQ9AafTiXEcEwDDMGRZlhOS5zlvt9vvwOVy4Xw+JwAul0uez2eS5H6/n9D1ek1jzDPQdR0XiwUBsKoq3u/3h3HbtuVqtSIAbjYbjuNIEXFKRJy1VjdNg2EYkGUZdrvdy31571HXNYwxKIoC2+3WT8DfPWX16Tt/AzhxzXfaX+pLAAAAAElFTkSuQmCC"></a></span>');
+		$(document).off('click', '.add_quote_to_reply, .add_quote_with_this_to_reply').on('click', '.add_quote_to_reply, .add_quote_with_this_to_reply', function (e) {
 			var postId = $(this).closest('.post_tools').find('a[href^="/PhantasyMail/"]').attr('href').replace(/\D/g,''),
-				userName = $(this).closest('.post_header').find('.poster_name a').text();
+				userName = $(this).closest('.post_header').find('.poster_name a').text(),
+				isAThisQuote = e.target.parentNode.className.indexOf('add_quote_with_this_to_reply') > -1;
 			e.preventDefault();
 			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/threads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}) + "/posts?limit=499&skip=0", function(data) {
 				var quotedPostBody = '', quotedQuotedPostBody = '', originalTextAreaContent = '';
@@ -249,6 +304,7 @@ var improvedPT = {};
 				improvedPT.postsrefs = data.references;
 				quotedPostBody = improvedPT.getPostBodyById(improvedPT.posts, postId);//console.log('quotedPostBody: ' + quotedPostBody);
 				quotedQuotedPostBody = '[quote=' + userName + ']' + quotedPostBody + '[/quote]';//console.log('quotedQuotedPostBody: ' + quotedQuotedPostBody);
+				if (isAThisQuote) {quotedQuotedPostBody = quotedQuotedPostBody + 'This';}
 				originalTextAreaContent = DOMPurify.sanitize($('#new_post textarea').val(), {SAFE_FOR_JQUERY: true});//console.log('originalTextAreaContent: ' + originalTextAreaContent);
 				$('#new_post textarea').val(originalTextAreaContent + quotedQuotedPostBody);//console.log('originalTextAreaContent + quotedQuotedPostBody: ' + originalTextAreaContent + quotedQuotedPostBody);
 				$('html, body').animate({
@@ -257,17 +313,15 @@ var improvedPT = {};
 				$('#new_post textarea').focusToEnd();
 			});
 		});
-		$('.add_quote_to_reply').css('cursor', 'pointer');
+		$('.add_quote_to_reply, .add_quote_with_this_to_reply').css('cursor', 'pointer');
 	};
-	improvedPT.getBands = function () {
-		$.get("https://www.phantasytour.com/api/bands", function(data) {
-			improvedPT.bands = data;
+	improvedPT.addTheadStats = function () {
+		$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/threads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}) + "/posts?limit=499&skip=0", function(data) {
+			improvedPT.posts = data.data;
+			improvedPT.postsrefs = data.references;
 
-			$.get("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/threads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}) + "/posts?limit=499&skip=0", function(data) {
-				improvedPT.posts = data.data;
-				improvedPT.postsrefs = data.references;
-
-				var filteredpostsrefs, tempPostsData = [], i, totalQty = 0;
+			var filteredpostsrefs, tempPostsData = [], i, totalQty = 0;
+			if ($('.ipt_stats_container').length < 1) {
 				for (i = 0; i < improvedPT.posts.length; i += 1) {
 					filteredpostsrefs = improvedPT.postsrefs.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId});
 					if (tempPostsData.filter(improvedPT.filterByAuthorID, {"authorId": improvedPT.posts[i].authorId}).length < 1) {
@@ -285,23 +339,30 @@ var improvedPT = {};
 				for (var i = 0; i < tempPostsData.length; i += 1) {
 					$('.ipt_stats_container ol').append(DOMPurify.sanitize('<li>' + tempPostsData[i].username + ' ' + tempPostsData[i].qty + ' (' + (Math.round(((tempPostsData[i].qty / totalQty) * 100) * 100)/100).toFixed(2) + '%)</li>', {SAFE_FOR_JQUERY: true})).css({'font-size': '0.7em', 'padding': '5px 0 5px 25px'}).parent('.ipt_stats_container').css({'background': 'rgba(255,255,255,0.25)', 'margin-top': '5px', '-moz-border-radius': '5px', 'border-radius': '5px'}).find('h6').css({'margin': '0', 'padding': '5px 5px 0 9px'});
 				}
-			});
-
-			setTimeout(improvedPT.checkMT, 2000);
-			setTimeout(improvedPT.addScrollDown, 2000);
-			setTimeout(improvedPT.addBumpThread, 2500);
-			setTimeout(improvedPT.addPrintThread, 2500);
-			setTimeout(improvedPT.addBoldText, 2500);
-			setTimeout(improvedPT.addItalicText, 2500);
-			setTimeout(improvedPT.addBoldItalicText, 2500);
-			setTimeout(improvedPT.addLinkBuilder, 2500);
-			setTimeout(improvedPT.enableQuoteOverride, 2500);
+			}
 		});
 	};
-	$(document).ready(function() {
-		improvedPT.getBands();
-	});
+	improvedPT.getBands = function () {
+		$.get("https://www.phantasytour.com/api/bands", function(data) {
+			improvedPT.bands = data;
+			
+			improvedPT.addTheadStats();
 
+			document.addEventListener('pt-thread-posts-loaded', function() {
+				improvedPT.checkMT();
+				improvedPT.addScrollDown();
+				improvedPT.addBumpThread();
+				improvedPT.addPrintThread();
+				improvedPT.addBoldText();
+				improvedPT.addItalicText();
+				improvedPT.addBoldItalicText();
+				improvedPT.addLinkBuilder();
+				improvedPT.enableQuoteOverride();
+				improvedPT.replaceLinks();
+			});
+
+		});
+	};
 	improvedPT.replaceLinks = function () {
 		var temp = true;
 		/*$.post("http://"+wnindow.location.host + window.location.pathname, {authenticity_token: $('input[name*="authenticity_token"]').val(), post_body:"testing123",post_topic_id: topic,commit: "Post Reply"}, function(data) {
@@ -430,11 +491,6 @@ var improvedPT = {};
 			$(".post:not(:hidden):odd").removeClass("even");
 		}
 	};
-	improvedPT.checkLoad = function () {
-		//if ($(".post").length !== improvedPT.num) {
-			improvedPT.replaceLinks();
-		//}
-	};
 	improvedPT.checkOc = function (s, y) {
 		var number = 0;
 		while (s.indexOf(y, 0) >= 0) {
@@ -446,24 +502,9 @@ var improvedPT = {};
 	improvedPT.containsNonAsciiChars = function (str) {
 		return str.split('').some(function(char) {return char.charCodeAt(0) > 127;});
 	};
-
-	$(document).on("mouseup", "ul.pagination li a, button.load-more-button", function() {
-		improvedPT.num = $(".post").length;
-		setTimeout(improvedPT.checkLoad, 3500);
+	$(document).ready(function() {
+		improvedPT.getBands();
 	});
-
-	$(document).ajaxComplete(function () {
-		improvedPT.num = $(".post").length;
-		setTimeout(improvedPT.checkLoad, 3500);
-	});
-
-	$("#bottom-pagination-container div + div > a:last").prev('a').attr("onclick", "").click(function () {
-		$('html, body').animate({
-			scrollTop: 0
-		}, "slow");
-	});
-
-
 	$(document).off("click", "#bottom-pagination-container div a:contains('MT'), .topic_header div a:contains('MT')").on("click", "#bottom-pagination-container div a:contains('MT'), .topic_header div a:contains('MT')", function() {
 		$.post("/api/mythreads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}), function () {
 			$("#bottom-pagination-container div a:contains('MT')").html(DOMPurify.sanitize($("#bottom-pagination-container div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔').css("color", "#757575");
