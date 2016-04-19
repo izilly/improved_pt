@@ -211,7 +211,7 @@ var improvedPT = {};
 		if ($('#boldText').length < 1) {
 			$('#new_post textarea').attr('id', 'postbox');
 			//$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
-			$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold and Italic Selected Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
+			$('#new_post textarea').after('<a href="#" id="boldText" title="Bold Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold Selected Text</a> | <a href="#" id="italicText" title="Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Italic Selected Text</a> | <a href="#" id="boldItalicText" title="Bold Italic Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Bold and Italic Selected Text</a> | <a href="#" id="orenText" title="Oren Text" onclick="setTimeout(function(){var root = ko.contextFor(document.getElementById(\'postbox\')).$root;root.newReplyBody(document.getElementById(\'postbox\').value); $(\'#postbox\').change();}, 169)">Oren Text</a> | <a href="#" id="createLink" title="Create Link">Create Link</a><br><br>');
 			$(document).off("click", "#boldText").on("click", "#boldText", function (e) {
 				var el = $('#new_post textarea')[0];
 				e.preventDefault();
@@ -236,6 +236,15 @@ var improvedPT = {};
 			e.preventDefault();
 			if (el.setSelectionRange) {
 				el.value = el.value.substring(0,el.selectionStart) + "[b][i]" + el.value.substring(el.selectionStart,el.selectionEnd) + "[/i][/b]" + el.value.substring(el.selectionEnd,el.value.length);
+			}
+		});
+	};
+	improvedPT.addOrenText = function () {
+		$(document).off("click", "#orenText").on("click", "#orenText", function (e) {
+			var el = $('#new_post textarea')[0];
+			e.preventDefault();
+			if (el.setSelectionRange) {
+				el.value = el.value.substring(0,el.selectionStart) + el.value.substring(el.selectionStart,el.selectionEnd).replace(/\./g, '?').toUpperCase() + el.value.substring(el.selectionEnd,el.value.length);
 			}
 		});
 	};
@@ -355,6 +364,7 @@ var improvedPT = {};
 				improvedPT.addBoldText();
 				improvedPT.addItalicText();
 				improvedPT.addBoldItalicText();
+				improvedPT.addOrenText();
 				improvedPT.addLinkBuilder();
 				improvedPT.enableQuoteOverride();
 				improvedPT.replaceLinks();
