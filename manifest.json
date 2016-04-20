@@ -7,7 +7,7 @@
         "js": ["jquery/jquery.min.js", "bootstrap/bootstrap.min.js", "bootstrap/bootstrap-dialog.min.js", "xbbcode/xbbcode.min.js", "linkify/linkify.min.js", "linkify/linkify-jquery.min.js", "dompurify/purify.min.js", "sample.js"],
         "matches": ["http://*.phantasytour.com/bands/*/threads/*/*", "https://*.phantasytour.com/bands/*/*threads/*/*"]
     }, {
-        "js": ["jquery/jquery.js", "dompurify/purify.min.js", "index.js"],
+        "js": ["jquery/jquery.min.js", "dompurify/purify.min.js", "index.js"],
         "matches": ["https://*.phantasytour.com/bands/*/threads", "https://*.phantasytour.com/bands/*/threads", "http://*.phantasytour.com/bands/*/threads?mode=MyThreads", "https://*.phantasytour.com/bands/*/threads?mode=MyThreads"]
     }],
     "description": "Improving your PT viewing. Finds all links to images and videos on PT and embeds them in the page.",
@@ -33,6 +33,6 @@
     },
     "options_page": "options/options.html",
     "permissions": ["http://*.phantasytour.com/*", "https://*.phantasytour.com/*", "contextMenus", "tabs", "storage", "activeTab"],
-    "version": "2.0.1.6",
+    "version": "2.0.1.7",
     "manifest_version": 2
 }

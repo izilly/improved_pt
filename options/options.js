@@ -1,159 +1,151 @@
 // Saves options to localStorage.
 function save_options() {
-	var select = document.getElementById("show");
-	var option = select.children[select.selectedIndex].value;
-	localStorage["show"] = option;
-	var selectColor = document.getElementById("color");
-	var optionColor = selectColor.value;
-	localStorage["color"] = optionColor;
-	var selectQ = document.getElementById("quotes");
-	var optionQ = selectQ.children[selectQ.selectedIndex].value;
-	localStorage["quotes"] = optionQ;
-	var selectV = document.getElementById("video");
-	var optionV = selectV.children[selectV.selectedIndex].value;
-	localStorage["video"] = optionV;
-	var selectR = document.getElementById("reload");
-	var optionR = selectR.children[selectR.selectedIndex].value;
-	localStorage["reload"] = optionR;
-	var selectF = document.getElementById("first");
-	var optionF = selectF.children[selectF.selectedIndex].value;
-	localStorage["first"] = optionF;
-	var selectS = document.getElementById("scroll");
-	var optionS = selectS.children[selectS.selectedIndex].value;
-	localStorage["scroll"] = optionS;
-	var selectSFW = document.getElementById("sfw");
-	var optionSFW = selectSFW.children[selectSFW.selectedIndex].value;
-	localStorage["sfw"] = optionSFW;
-
+	var status,
+		selectShow = document.getElementById("show"),
+		optionShow = selectShow.children[selectShow.selectedIndex].value,
+		selectColor = document.getElementById("color"),
+		optionColor = selectColor.value,
+		selectQuotes = document.getElementById("quotes"),
+		optionQuotes = selectQuotes.children[selectQuotes.selectedIndex].value,
+		selectVideo = document.getElementById("video"),
+		optionVideo = selectVideo.children[selectVideo.selectedIndex].value,
+		selectReload = document.getElementById("reload"),
+		optionReload = selectReload.children[selectReload.selectedIndex].value,
+		selectFirst = document.getElementById("first"),
+		optionFirst = selectFirst.children[selectFirst.selectedIndex].value,
+		selectScroll = document.getElementById("scroll"),
+		optionScroll = selectScroll.children[selectScroll.selectedIndex].value,
+		selectSFW = document.getElementById("sfw"),
+		optionSFW = selectSFW.children[selectSFW.selectedIndex].value;
+	localStorage.show = optionShow;
+	localStorage.color = optionColor;
+	localStorage.quotes = optionQuotes;
+	localStorage.video = optionVideo;
+	localStorage.reload = optionReload;
+	localStorage.first = optionFirst;
+	localStorage.scroll = optionScroll;
+	localStorage.sfw = optionSFW;
 	// Update status to let user know options were saved.
-	var status = document.getElementById("status");
+	status = document.getElementById("status");
 	status.innerHTML = "Options Saved.";
-	setTimeout(function() {
-		status.innerHTML = "";
-	}, 750);
-}
-
-function reset() {
-	localStorage.clear();
-	localStorage["color"] = "0000FF";
-	restore_options();
-	// Update status to let user know options were saved.
-	var status = document.getElementById("status");
-	status.innerHTML = "Options Saved.";
-	setTimeout(function() {
+	setTimeout(function () {
 		status.innerHTML = "";
 	}, 750);
 }
 
 // Restores select box state to saved value from localStorage.
 function restore_options() {
-	var favorite = localStorage["show"];
-	var colored = localStorage["color"];
-	var videod = localStorage["video"];
-	var quoted = localStorage["quotes"];
-	var reloaded = localStorage["reload"];
-	var firsted = localStorage["first"];
-	var scrolled = localStorage["scroll"];
-	var sfwed = localStorage["sfw"];
+	var favorite = localStorage.show,
+		colored = localStorage.color,
+		videod = localStorage.video,
+		quoted = localStorage.quotes,
+		reloaded = localStorage.reload,
+		firsted = localStorage.first,
+		scrolled = localStorage.scroll,
+		sfwed = localStorage.sfw,
+		selectShow, selectVideo, selectQuotes, selectReload, selectFirst, selectScroll, selectSFW, selectColor, i, child;
 	if (!favorite) {
-	}
-	else {
-		var select = document.getElementById("show");
-		for (var i = 0; i < select.children.length; i++) {
-			var child = select.children[i];
-			if (child.value == favorite) {
+	} else {
+		selectShow = document.getElementById("show");
+		for (i = 0; i < selectShow.children.length; i++) {
+			child = selectShow.children[i];
+			if (child.value === favorite) {
 				child.selected = "true";
 				break;
 			}
 		}
 	}
 	if (!videod) {
-	}
-	else {
-		var select = document.getElementById("video");
-		for (var i = 0; i < select.children.length; i++) {
-			var child = select.children[i];
-			if (child.value == videod) {
+	} else {
+		selectVideo = document.getElementById("video");
+		for (i = 0; i < selectVideo.children.length; i++) {
+			child = selectVideo.children[i];
+			if (child.value === videod) {
 				child.selected = "true";
 				break;
 			}
 		}
 	}
 	if (!quoted) {
-	}
-	else {
-		var select = document.getElementById("quotes");
-		for (var i = 0; i < select.children.length; i++) {
-			var child = select.children[i];
-			if (child.value == quoted) {
+	} else {
+		selectQuotes = document.getElementById("quotes");
+		for (i = 0; i < selectQuotes.children.length; i++) {
+			child = selectQuotes.children[i];
+			if (child.value === quoted) {
 				child.selected = "true";
 				break;
 			}
 		}
 	}
 	if (!reloaded) {
-	}
-	else {
-		var select = document.getElementById("reload");
-		for (var i = 0; i < select.children.length; i++) {
-			var child = select.children[i];
-			if (child.value == reloaded) {
+	} else {
+		selectReload = document.getElementById("reload");
+		for (i = 0; i < selectReload.children.length; i++) {
+			child = selectReload.children[i];
+			if (child.value === reloaded) {
 				child.selected = "true";
 				break;
 			}
 		}
 	}
 	if (!firsted) {
-	}
-	else {
-		var select = document.getElementById("first");
-		for (var i = 0; i < select.children.length; i++) {
-			var child = select.children[i];
-			if (child.value == firsted) {
+	} else {
+		selectFirst = document.getElementById("first");
+		for (i = 0; i < selectFirst.children.length; i++) {
+			child = selectFirst.children[i];
+			if (child.value === firsted) {
 				child.selected = "true";
 				break;
 			}
 		}
 	}
 	if (!scrolled) {
-	}
-	else {
-		var select = document.getElementById("scroll");
-		for (var i = 0; i < select.children.length; i++) {
-			var child = select.children[i];
-			if (child.value == scrolled) {
+	} else {
+		selectScroll = document.getElementById("scroll");
+		for (i = 0; i < selectScroll.children.length; i++) {
+			child = selectScroll.children[i];
+			if (child.value === scrolled) {
 				child.selected = "true";
 				break;
 			}
 		}
 	}
 	if (!sfwed) {
-	}
-	else {
-		var select = document.getElementById("sfw");
-		for (var i = 0; i < select.children.length; i++) {
-			var child = select.children[i];
-			if (child.value == sfwed) {
+	} else {
+		selectSFW = document.getElementById("sfw");
+		for (i = 0; i < selectSFW.children.length; i++) {
+			child = selectSFW.children[i];
+			if (child.value === sfwed) {
 				child.selected = "true";
 				break;
 			}
 		}
 	}
 	if (!colored) {
-		var select2 = document.getElementById("color");
-		select2.color.fromString("0000FF");
-	}
-	else {
-		var select2 = document.getElementById("color");
-		select2.color.fromString(colored);
+		selectColor = document.getElementById("color");
+		selectColor.color.fromString("0000FF");
+	} else {
+		selectColor = document.getElementById("color");
+		selectColor.color.fromString(colored);
 	}
 }
 
+function reset() {
+	var status;
+	localStorage.clear();
+	localStorage.color = "0000FF";
+	restore_options();
+	// Update status to let user know options were saved.
+	status = document.getElementById("status");
+	status.innerHTML = "Options Saved.";
+	setTimeout(function () {
+		status.innerHTML = "";
+	}, 750);
+}
 
-
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 	jscolor.init();
 	restore_options();
+	document.getElementById('saveBtn').addEventListener('click', save_options);
+	document.getElementById('resetBtn').addEventListener('click', reset);
 });
-document.getElementById('saveBtn').addEventListener('click', save_options);
-document.getElementById('resetBtn').addEventListener('click', reset);

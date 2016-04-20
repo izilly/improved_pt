@@ -596,7 +596,7 @@ var improvedPT = {};
 			if (!improvedPT.colorSet) {
 				improvedPT.colorSet = "0000FF";
 			}
-			if (improvedPT.sfwSet !== "false") {
+			if (improvedPT.sfwSet === "true") {
 				$('body').attr('style', function(i, s) { return (s||'') + 'background: #fff !important;'; });
 				$('#main').css('background', '#fff');
 				$('#branding').css('display', 'none');
@@ -626,14 +626,26 @@ var improvedPT = {};
 		});
 	};
 	improvedPT.overrideMTBtns = function () {
-		$(document).off("click", "#bottom-pagination-container div a:contains('MT'), .topic_header div a:contains('MT')").on("click", "#bottom-pagination-container div a:contains('MT'), .topic_header div a:contains('MT')", function() {
-			$.post("/api/mythreads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}), function () {
-				$("#bottom-pagination-container div a:contains('MT')").html(DOMPurify.sanitize($("#bottom-pagination-container div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔').css("color", "#757575");
-				$(".topic_header div a:contains('MT')").html(DOMPurify.sanitize($(".topic_header div a:contains('MT')").html(), {SAFE_FOR_JQUERY: true}) + '✔');
-				improvedPT.mt = true;
+		if ($('.topic_header div a.improvedpt-mt').length < 1) {
+			$('.topic_header div a:contains("MT")').hide().after('<a href="#" title="Add to My Threads" class="improvedpt-mt">MT</a>');
+			$('#bottom-pagination-container div a:contains("MT")').hide().after('<a style="margin:10px;" href="#" class="improvedpt-mt">MT</a>');
+			$(document).off('click', '#bottom-pagination-container div a:contains("MT"), .topic_header div a:contains("MT")').on('click', '#bottom-pagination-container div a:contains("MT"), .topic_header div a:contains("MT")', function() {
+				if ($('#bottom-pagination-container div a:contains("✔")').length < 1 | $('.topic_header div a:contains("✔")').length < 1) {
+					$.post("/api/mythreads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}), function () {
+						$('#bottom-pagination-container div a:contains("MT")').html(DOMPurify.sanitize($('#bottom-pagination-container div a:contains("MT")').html(), {SAFE_FOR_JQUERY: true}) + '✔');
+						$('.topic_header div a:contains("MT")').html(DOMPurify.sanitize($('.topic_header div a:contains("MT")').html(), {SAFE_FOR_JQUERY: true}) + '✔');
+						improvedPT.mt = true;
+					});
+				} else {
+					$.ajax({url: "/api/mythreads/" + DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true}), method: 'DELETE'}).done(function () {
+						$('#bottom-pagination-container div a:contains("MT")').html(DOMPurify.sanitize($('#bottom-pagination-container div a:contains("MT")').html().replace('✔', ''), {SAFE_FOR_JQUERY: true}));
+						$('.topic_header div a:contains("MT")').html(DOMPurify.sanitize($('.topic_header div a:contains("MT")').html().replace('✔', ''), {SAFE_FOR_JQUERY: true}));
+						improvedPT.mt = false;
+					});
+				}
+				return false;
 			});
-			return false;
-		});
+		}
 	};
 	improvedPT.addMessageListener = function () {
 		chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
