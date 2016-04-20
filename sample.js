@@ -503,6 +503,57 @@ var improvedPT = {};
 	improvedPT.containsNonAsciiChars = function (str) {
 		return str.split('').some(function (char) {return char.charCodeAt(0) > 127;});
 	};
+	improvedPT.isValidBBCode = function (tagName, _text) {
+		var openRE = new RegExp('\\[' + tagName + '[^[]*\\]', 'ig'),
+			closeRE = new RegExp('\\[\\/' + tagName + '\\]', 'ig'),
+			openMatches = _text.match(openRE),
+			closeMatches = _text.match(closeRE);
+		if (openMatches && closeMatches) {
+			return Boolean(openMatches.length === closeMatches.length);
+		} else {
+			if ( !openMatches && !closeMatches ) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	};
+	improvedPT.validateBBCode = function () {
+		var postBody = $("#new_post textarea").val(),
+			tagNames = ['quote', 'a', 'b', 'i'],
+			errMsg = "";
+		tagNames.forEach(function (val) {
+			if (!improvedPT.isValidBBCode(val, postBody)) {
+				errMsg += 'unmatched [' + val + '] tags\n';
+			}
+		});
+		return errMsg;
+	};
+	improvedPT.showBBCodeWarning = function (errMsg, e, isPreview, parentDiv, postContinue, postAbort) {
+		var formMsg = '<div>' + errMsg + '</div>',
+			buttonLabels = ['Post anyway', 'Edit before posting'];
+		if (isPreview) {
+			buttonLabels = ['Preview', 'Edit post'];
+		}
+		BootstrapDialog.show({
+			title: 'Warning: unbalanced formatting tags!',
+			message: formMsg,
+			buttons: [{
+				label: buttonLabels[0],
+				action: function (dialogRef) {
+					dialogRef.close();
+					postContinue(e, parentDiv, isPreview);
+				}
+			},
+			{
+				label: buttonLabels[1],
+				action: function (dialogRef) {
+					dialogRef.close();
+					postAbort(e);
+				}
+			}]
+		});
+	};
 	improvedPT.threadShow = function () {
 		chrome.runtime.sendMessage({
 			set: "show"
@@ -515,9 +566,15 @@ var improvedPT = {};
 			improvedPT.reloadTopic = response.setReload;
 			improvedPT.scrollSet = response.setScroll;
 			improvedPT.sfwSet = response.setSfw;
+			// todo: add settings
+			improvedPT.validateBBSet = response.setValidateBB;
 			if (improvedPT.reloadTopic !== "false") {
-				$('button[data-bind*="click: postReply"]').after($('button[data-bind*="click: postReply"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'postReplyBtn')).hide();
-				$('button[data-bind*="click: onPreview"]').after($('button[data-bind*="click: onPreview"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'previewReplyBtn')).hide();
+				if ($('#postReplyBtn').length < 1) {
+					$('button[data-bind*="click: postReply"]').after($('button[data-bind*="click: postReply"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'postReplyBtn')).hide();
+				}
+				if ($('#previewReplyBtn').length < 1) {
+					$('button[data-bind*="click: onPreview"]').after($('button[data-bind*="click: onPreview"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'previewReplyBtn')).hide();
+				}
 				$(document).off('click', '#postReplyBtn').on("click", '#postReplyBtn', function(e) {
 					var errorHTML;
 					e.preventDefault;
@@ -623,6 +680,47 @@ var improvedPT = {};
 				$(".post:not(:hidden):odd").removeClass("even");
 			}
 			improvedPT.replaceLinks();
+
+			if (improvedPT.validateBBSet === 'true') {
+				setTimeout(function () {
+					var replyBtn = $('#new_post .btn-primary:visible'),
+						parentDiv = replyBtn.parent(),
+						forcePost, preventPost, restoreListener, postInterceptor;
+					preventPost = function () {
+						//console.log('preventPost running');
+					};
+					postInterceptor = function (e) {
+						var isPreview, errMsg;
+						if (e.target.textContent.search(/preview/i) > -1) {
+							//console.log('preview btn canceling');
+							isPreview = true;
+							//return false;
+						} else {
+							isPreview = false;
+							//console.log(e.target.textContent);
+						}
+						errMsg = improvedPT.validateBBCode();
+						if (errMsg) {
+							e.stopPropagation();
+							e.preventDefault();
+							improvedPT.showBBCodeWarning(errMsg, e, isPreview, parentDiv, forcePost, preventPost);
+						}
+					};
+					restoreListener = function () {
+						parentDiv[0].addEventListener("click", postInterceptor, true);
+					};
+					forcePost = function (e, parentDiv, isPreview) {
+						//console.log('force_post running');
+						parentDiv[0].removeEventListener("click", postInterceptor, true);
+						if (isPreview) {
+							//console.log('isPreview, restoring listener');
+							e.target.onclick = restoreListener;
+						}
+						e.target.click();
+					};
+					parentDiv[0].addEventListener("click", postInterceptor, true);
+				}, 1000);
+			}
 		});
 	};
 	improvedPT.overrideMTBtns = function () {

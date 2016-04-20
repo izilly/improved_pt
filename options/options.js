@@ -16,7 +16,9 @@ function save_options() {
 		selectScroll = document.getElementById("scroll"),
 		optionScroll = selectScroll.children[selectScroll.selectedIndex].value,
 		selectSFW = document.getElementById("sfw"),
-		optionSFW = selectSFW.children[selectSFW.selectedIndex].value;
+		optionSFW = selectSFW.children[selectSFW.selectedIndex].value,
+		selectValidateBB = document.getElementById("validatebb"),
+		optionValidateBB = selectValidateBB.children[selectValidateBB.selectedIndex].value;
 	localStorage.show = optionShow;
 	localStorage.color = optionColor;
 	localStorage.quotes = optionQuotes;
@@ -25,6 +27,7 @@ function save_options() {
 	localStorage.first = optionFirst;
 	localStorage.scroll = optionScroll;
 	localStorage.sfw = optionSFW;
+	localStorage.validatebb = optionValidateBB;
 	// Update status to let user know options were saved.
 	status = document.getElementById("status");
 	status.innerHTML = "Options Saved.";
@@ -43,7 +46,8 @@ function restore_options() {
 		firsted = localStorage.first,
 		scrolled = localStorage.scroll,
 		sfwed = localStorage.sfw,
-		selectShow, selectVideo, selectQuotes, selectReload, selectFirst, selectScroll, selectSFW, selectColor, i, child;
+		validatebbed = localStorage.validatebb,
+		selectShow, selectVideo, selectQuotes, selectReload, selectFirst, selectScroll, selectSFW, selectValidateBB, selectColor, i, child;
 	if (!favorite) {
 	} else {
 		selectShow = document.getElementById("show");
@@ -116,6 +120,17 @@ function restore_options() {
 		for (i = 0; i < selectSFW.children.length; i++) {
 			child = selectSFW.children[i];
 			if (child.value === sfwed) {
+				child.selected = "true";
+				break;
+			}
+		}
+	}
+	if (!validatebbed) {
+	} else {
+		selectValidateBB = document.getElementById("validatebb");
+		for (i = 0; i < selectValidateBB.children.length; i++) {
+			child = selectValidateBB.children[i];
+			if (child.value === validatebbed) {
 				child.selected = "true";
 				break;
 			}
