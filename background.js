@@ -1,27 +1,36 @@
+
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {//console.log(request); console.log(sender);
 		if (request.set === "show") {//console.log('background.js received show request');
-			chrome.storage.sync.get({
-				show: 'click',
-				color: '0000FF',
-				quotes: 'qno',
-				video: 'vclick',
-				reload: 'true',
-				scroll: 'true',
-				sfw: 'false'
-			},
-			function(items) {//console.log(items);
-				sendResponse({setShow: items.show, setColor: items.color, setVideo: items.video, setQuotes: items.quotes, setReload: items.reload, setScroll: items.scroll, setSfw: items.sfw});
-			});
+			if (typeof chrome.storage.sync !== 'undefined') {
+				chrome.storage.sync.get({
+					show: 'click',
+					color: '0000FF',
+					quotes: 'qno',
+					video: 'vclick',
+					reload: 'true',
+					scroll: 'true',
+					sfw: 'false'
+				},
+				function(items) {//console.log(items);
+					sendResponse({setShow: items.show, setColor: items.color, setVideo: items.video, setQuotes: items.quotes, setReload: items.reload, setScroll: items.scroll, setSfw: items.sfw});
+				});
+			} else {
+				sendResponse({setShow: localStorage.show, setColor: localStorage.color, setVideo: localStorage.video, setQuotes: localStorage.quotes, setReload: localStorage.reload, setScroll: localStorage.scroll, setSfw: localStorage.sfw});
+			}
 			return true;
 		} else if (request.set === "index") {//console.log('background.js received index request');
-			chrome.storage.sync.get({
-				first: 'false',
-				sfw: 'false'
-			},
-			function(items) {
-				sendResponse({setFirst: items.first, setSfw: items.sfw});
-			});
+			if (typeof chrome.storage.sync !== 'undefined') {
+				chrome.storage.sync.get({
+					first: 'false',
+					sfw: 'false'
+				},
+				function(items) {
+					sendResponse({setFirst: items.first, setSfw: items.sfw});
+				});
+			} else {
+				sendResponse({setFirst:localStorage.first, setSfw: localStorage.sfw});
+			}
 			return true;
 		} else if (request.set === "print") {//console.log('background.js received print request');
 			chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
@@ -59,26 +68,40 @@ function closeAll() {
 	});
 }
 
-chrome.storage.sync.get({
-	show: 'load'
-},
-function(items) {
-	if (items.show !== "load") {
+if (typeof chrome.storage.sync !== 'undefined') {
+	chrome.storage.sync.get({
+		show: 'load'
+	},
+	function(items) {
+		if (items.show !== "load") {
+			chrome.contextMenus.create({
+				"id": "cmOpenAllLinks",
+				"title": "Open All Links",
+				"contexts": ["page","selection","link","editable","audio","video"],
+				"onclick": send
+			});
+		}
+	});
+} else {
+	if (localStorage.show !== "load") {
 		chrome.contextMenus.create({
+			"id": "cmOpenAllLinks",
 			"title": "Open All Links",
 			"contexts": ["page","selection","link","editable","audio","video"],
 			"onclick": send
 		});
 	}
-});
+}
 
 chrome.contextMenus.create({
+	"id": "cmCloseImage",
 	"title": "Close Image",
 	"contexts": ["image"],
 	"onclick": close
 }); 
 
 chrome.contextMenus.create({
+	"id": "cmCloseAllLinks",
 	"title": "Close All Links",
 	"contexts": ["page","selection","link","editable","audio","video"],
 	"onclick": closeAll
