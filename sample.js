@@ -503,66 +503,57 @@ var improvedPT = {};
 	improvedPT.containsNonAsciiChars = function (str) {
 		return str.split('').some(function (char) {return char.charCodeAt(0) > 127;});
 	};
-
-	improvedPT.is_valid_bbcode = function (tagname, _text) {
-			var open_re = new RegExp('\\[' + tagname + '[^[]*\\]', 'ig');
-			var close_re = new RegExp('\\[\\/' + tagname + '\\]', 'ig');
-			var open_matches = _text.match(open_re);
-			var close_matches = _text.match(close_re);
-			if (open_matches && close_matches) {
-				return Boolean(open_matches.length == close_matches.length);
+	improvedPT.isValidBBCode = function (tagName, _text) {
+		var openRE = new RegExp('\\[' + tagName + '[^[]*\\]', 'ig'),
+			closeRE = new RegExp('\\[\\/' + tagName + '\\]', 'ig'),
+			openMatches = _text.match(openRE),
+			closeMatches = _text.match(closeRE);
+		if (openMatches && closeMatches) {
+			return Boolean(openMatches.length === closeMatches.length);
+		} else {
+			if ( !openMatches && !closeMatches ) {
+				return true;
 			} else {
-				if ( !open_matches && !close_matches ) {
-					return true;
-				} else {
-					return false;
+				return false;
+			}
+		}
+	};
+	improvedPT.validateBBCode = function () {
+		var postBody = $("#new_post textarea").val(),
+			tagNames = ['quote', 'a', 'b', 'i'],
+			errMsg = "";
+		tagNames.forEach(function (val) {
+			if (!improvedPT.isValidBBCode(val, postBody)) {
+				errMsg += 'unmatched [' + val + '] tags\n';
+			}
+		});
+		return errMsg;
+	};
+	improvedPT.showBBCodeWarning = function (errMsg, e, isPreview, parentDiv, postContinue, postAbort) {
+		var formMsg = '<div>' + errMsg + '</div>',
+			buttonLabels = ['Post anyway', 'Edit before posting'];
+		if (isPreview) {
+			buttonLabels = ['Preview', 'Edit post'];
+		}
+		BootstrapDialog.show({
+			title: 'Warning: unbalanced formatting tags!',
+			message: formMsg,
+			buttons: [{
+				label: buttonLabels[0],
+				action: function (dialogRef) {
+					dialogRef.close();
+					postContinue(e, parentDiv, isPreview);
 				}
-			}
-		};
-
-	improvedPT.validate_bbcode = function () {
-		var post_body = $("#new_post textarea").val();
-		var tagnames = ['quote', 'a', 'b', 'i'];
-		var errmsg = "";
-		tagnames.forEach(function(val,idx) {
-			if ( ! improvedPT.is_valid_bbcode(val, post_body) ) {
-				errmsg += 'unmatched [' + val + '] tags\n';
-			}
-		})
-    return errmsg;
+			},
+			{
+				label: buttonLabels[1],
+				action: function (dialogRef) {
+					dialogRef.close();
+					postAbort(e);
+				}
+			}]
+		});
 	};
-
-	improvedPT.show_bbcode_warning = function (errmsg, 
-                                             e, 
-                                             ispreview,
-                                             parentdiv,
-                                             post_continue, 
-                                             post_abort) {
-			var form_msg = '<div>' + errmsg + '</div>';
-      var button_labels = [ 'Post anyway', 'Edit before posting' ];
-      if ( ispreview ) {
-        button_labels = [ 'Preview', 'Edit post' ];
-      }
-			BootstrapDialog.show({
-				title: 'Warning: unbalanced formatting tags!',
-							message: form_msg,
-              buttons: [{
-                      label: button_labels[0],
-                      action: function (dialogRef) {
-                              dialogRef.close();
-                              post_continue(e, parentdiv, ispreview);
-                      }
-              },
-              {
-                      label: button_labels[1],
-                      action: function (dialogRef) {
-                              dialogRef.close();
-                              post_abort(e);
-                      }
-              }]
-			});
-	};
-
 	improvedPT.threadShow = function () {
 		chrome.runtime.sendMessage({
 			set: "show"
@@ -576,10 +567,14 @@ var improvedPT = {};
 			improvedPT.scrollSet = response.setScroll;
 			improvedPT.sfwSet = response.setSfw;
 			// todo: add settings
-			improvedPT.validatebbSet = response.setValidateBB;
+			improvedPT.validateBBSet = response.setValidateBB;
 			if (improvedPT.reloadTopic !== "false") {
-				$('button[data-bind*="click: postReply"]').after($('button[data-bind*="click: postReply"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'postReplyBtn')).hide();
-				$('button[data-bind*="click: onPreview"]').after($('button[data-bind*="click: onPreview"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'previewReplyBtn')).hide();
+				if ($('#postReplyBtn').length < 1) {
+					$('button[data-bind*="click: postReply"]').after($('button[data-bind*="click: postReply"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'postReplyBtn')).hide();
+				}
+				if ($('#previewReplyBtn').length < 1) {
+					$('button[data-bind*="click: onPreview"]').after($('button[data-bind*="click: onPreview"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'previewReplyBtn')).hide();
+				}
 				$(document).off('click', '#postReplyBtn').on("click", '#postReplyBtn', function(e) {
 					var errorHTML;
 					e.preventDefault;
@@ -686,68 +681,48 @@ var improvedPT = {};
 			}
 			improvedPT.replaceLinks();
 
-			if ( improvedPT.validatebbSet == 'true' ) {
-				setTimeout(function(){
-					// get the 'Post Reply' button
-					var replybtn = $('#new_post .btn-primary:visible');
-					// get the parent DIV
-					var parentdiv = replybtn.parent();
-					parentdiv[0].addEventListener("click", post_interceptor, true);
-
-					function post_interceptor (e) {
-						if ( e.target.textContent.search(/preview/i) > -1 ) {
+			if (improvedPT.validateBBSet === 'true') {
+				setTimeout(function () {
+					var replyBtn = $('#new_post .btn-primary:visible'),
+						parentDiv = replyBtn.parent(),
+						forcePost, preventPost, restoreListener, postInterceptor;
+					preventPost = function () {
+						//console.log('preventPost running');
+					};
+					postInterceptor = function (e) {
+						var isPreview, errMsg;
+						if (e.target.textContent.search(/preview/i) > -1) {
 							//console.log('preview btn canceling');
-							var ispreview = true;
+							isPreview = true;
 							//return false;
 						} else {
-							var ispreview = false;
+							isPreview = false;
 							//console.log(e.target.textContent);
 						}
-						var errmsg = improvedPT.validate_bbcode();
-						if ( errmsg ) {
+						errMsg = improvedPT.validateBBCode();
+						if (errMsg) {
 							e.stopPropagation();
 							e.preventDefault();
-							improvedPT.show_bbcode_warning(errmsg,
-																						 e, 
-																						 ispreview,
-																						 parentdiv,
-																						 force_post, 
-																						 prevent_post);
+							improvedPT.showBBCodeWarning(errMsg, e, isPreview, parentDiv, forcePost, preventPost);
 						}
-					}
-
-					function force_post (e, parentdiv, ispreview) {
+					};
+					restoreListener = function () {
+						parentDiv[0].addEventListener("click", postInterceptor, true);
+					};
+					forcePost = function (e, parentDiv, isPreview) {
 						//console.log('force_post running');
-						parentdiv[0].removeEventListener("click", post_interceptor, true);
-						if ( ispreview ) {
-							//console.log('ispreview, restoring listener');
+						parentDiv[0].removeEventListener("click", postInterceptor, true);
+						if (isPreview) {
+							//console.log('isPreview, restoring listener');
 							e.target.onclick = restoreListener;
 						}
 						e.target.click();
+					};
+					if (typeof parentDiv[0] !== 'undefined') {
+						parentDiv[0].addEventListener("click", postInterceptor, true);
 					}
-
-					function prevent_post (e) {
-						//console.log('prevent_post running');
-					}
-
-					function restoreListener () {
-						parentdiv[0].addEventListener("click", post_interceptor, true);
-					}
-
 				}, 1000);
 			}
-
-
-
-
-
-
-
-
-
-
-
-
 		});
 	};
 	improvedPT.overrideMTBtns = function () {

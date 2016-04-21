@@ -1,14 +1,14 @@
 // Saves options to chrome.storage.sync.
 function save_options() {
-	var show = DOMPurify.sanitize(document.getElementById('show').value, {SAFE_FOR_JQUERY: true});
-	var color = DOMPurify.sanitize(document.getElementById('color').value, {SAFE_FOR_JQUERY: true});
-	var quotes = DOMPurify.sanitize(document.getElementById('quotes').value, {SAFE_FOR_JQUERY: true});
-	var video = DOMPurify.sanitize(document.getElementById('video').value, {SAFE_FOR_JQUERY: true});
-	var reload = DOMPurify.sanitize(document.getElementById('reload').value, {SAFE_FOR_JQUERY: true});
-	var first = DOMPurify.sanitize(document.getElementById('first').value, {SAFE_FOR_JQUERY: true});
-	var scroll = DOMPurify.sanitize(document.getElementById('scroll').value, {SAFE_FOR_JQUERY: true});
-	var sfw = DOMPurify.sanitize(document.getElementById('sfw').value, {SAFE_FOR_JQUERY: true});
-	var validatebb = DOMPurify.sanitize(document.getElementById('validatebb').value, {SAFE_FOR_JQUERY: true});
+	var show = DOMPurify.sanitize(document.getElementById('show').value, {SAFE_FOR_JQUERY: true}),
+		color = DOMPurify.sanitize(document.getElementById('color').value, {SAFE_FOR_JQUERY: true}),
+		quotes = DOMPurify.sanitize(document.getElementById('quotes').value, {SAFE_FOR_JQUERY: true}),
+		video = DOMPurify.sanitize(document.getElementById('video').value, {SAFE_FOR_JQUERY: true}),
+		reload = DOMPurify.sanitize(document.getElementById('reload').value, {SAFE_FOR_JQUERY: true}),
+		first = DOMPurify.sanitize(document.getElementById('first').value, {SAFE_FOR_JQUERY: true}),
+		scroll = DOMPurify.sanitize(document.getElementById('scroll').value, {SAFE_FOR_JQUERY: true}),
+		sfw = DOMPurify.sanitize(document.getElementById('sfw').value, {SAFE_FOR_JQUERY: true}),
+		validatebb = DOMPurify.sanitize(document.getElementById('validatebb').value, {SAFE_FOR_JQUERY: true});
 	chrome.storage.sync.set({
 		show: show,
 		color: color,

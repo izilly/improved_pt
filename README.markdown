@@ -35,5 +35,8 @@ Visit <https://chrome.google.com/webstore/detail/gfelacdhnjmjadhabekkfliiojkljca
 ##Creator
 This extension was created by Daniel Saewitz. If you reuse the source code, please follow the license below and attribute accordingly.
 
+##Additional Developers
+In 2016, a group effort was made by Phantasy Tour forum members mr_wrong, nolxiii and fenningenarius to update this old extension which hadn't seen an update in years. The latest version of the extension available from the Chrome store was version 1.9.8.1 and none of the features worked any longer due to changes to the Phantasy Tour website as well as the Google Chrome/Chromium web browsers. Some features have been added to the extension, some features have been updated to work properly again and other features have been removed due to them no longer being useful. The result of the group's efforts can be seen in the first public rerelease of the extension, version 2.0.1.9.
+
 ##License
 This source code follows the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 license.  Please see the included LICENSE file for more details.
