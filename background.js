@@ -10,13 +10,14 @@ chrome.runtime.onMessage.addListener(
 					video: 'vclick',
 					reload: 'true',
 					scroll: 'true',
-					sfw: 'false'
+					sfw: 'false',
+					validatebb: 'true'
 				},
 				function(items) {//console.log(items);
-					sendResponse({setShow: items.show, setColor: items.color, setVideo: items.video, setQuotes: items.quotes, setReload: items.reload, setScroll: items.scroll, setSfw: items.sfw});
+					sendResponse({setShow: items.show, setColor: items.color, setVideo: items.video, setQuotes: items.quotes, setReload: items.reload, setScroll: items.scroll, setSfw: items.sfw, setValidateBB: items.validatebb});
 				});
 			} else {
-				sendResponse({setShow: localStorage.show, setColor: localStorage.color, setVideo: localStorage.video, setQuotes: localStorage.quotes, setReload: localStorage.reload, setScroll: localStorage.scroll, setSfw: localStorage.sfw});
+				sendResponse({setShow: localStorage.show, setColor: localStorage.color, setVideo: localStorage.video, setQuotes: localStorage.quotes, setReload: localStorage.reload, setScroll: localStorage.scroll, setSfw: localStorage.sfw, setValidateBB: localStorage.validatebb});
 			}
 			return true;
 		} else if (request.set === "index") {//console.log('background.js received index request');

@@ -503,6 +503,66 @@ var improvedPT = {};
 	improvedPT.containsNonAsciiChars = function (str) {
 		return str.split('').some(function (char) {return char.charCodeAt(0) > 127;});
 	};
+
+	improvedPT.is_valid_bbcode = function (tagname, _text) {
+			var open_re = new RegExp('\\[' + tagname + '[^[]*\\]', 'ig');
+			var close_re = new RegExp('\\[\\/' + tagname + '\\]', 'ig');
+			var open_matches = _text.match(open_re);
+			var close_matches = _text.match(close_re);
+			if (open_matches && close_matches) {
+				return Boolean(open_matches.length == close_matches.length);
+			} else {
+				if ( !open_matches && !close_matches ) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		};
+
+	improvedPT.validate_bbcode = function () {
+		var post_body = $("#new_post textarea").val();
+		var tagnames = ['quote', 'a', 'b', 'i'];
+		var errmsg = "";
+		tagnames.forEach(function(val,idx) {
+			if ( ! improvedPT.is_valid_bbcode(val, post_body) ) {
+				errmsg += 'unmatched [' + val + '] tags\n';
+			}
+		})
+    return errmsg;
+	};
+
+	improvedPT.show_bbcode_warning = function (errmsg, 
+                                             e, 
+                                             ispreview,
+                                             parentdiv,
+                                             post_continue, 
+                                             post_abort) {
+			var form_msg = '<div>' + errmsg + '</div>';
+      var button_labels = [ 'Post anyway', 'Edit before posting' ];
+      if ( ispreview ) {
+        button_labels = [ 'Preview', 'Edit post' ];
+      }
+			BootstrapDialog.show({
+				title: 'Warning: unbalanced formatting tags!',
+							message: form_msg,
+              buttons: [{
+                      label: button_labels[0],
+                      action: function (dialogRef) {
+                              dialogRef.close();
+                              post_continue(e, parentdiv, ispreview);
+                      }
+              },
+              {
+                      label: button_labels[1],
+                      action: function (dialogRef) {
+                              dialogRef.close();
+                              post_abort(e);
+                      }
+              }]
+			});
+	};
+
 	improvedPT.threadShow = function () {
 		chrome.runtime.sendMessage({
 			set: "show"
@@ -515,6 +575,8 @@ var improvedPT = {};
 			improvedPT.reloadTopic = response.setReload;
 			improvedPT.scrollSet = response.setScroll;
 			improvedPT.sfwSet = response.setSfw;
+			// todo: add settings
+			improvedPT.validatebbSet = response.setValidateBB;
 			if (improvedPT.reloadTopic !== "false") {
 				$('button[data-bind*="click: postReply"]').after($('button[data-bind*="click: postReply"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'postReplyBtn')).hide();
 				$('button[data-bind*="click: onPreview"]').after($('button[data-bind*="click: onPreview"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'previewReplyBtn')).hide();
@@ -623,6 +685,69 @@ var improvedPT = {};
 				$(".post:not(:hidden):odd").removeClass("even");
 			}
 			improvedPT.replaceLinks();
+
+			if ( improvedPT.validatebbSet == 'true' ) {
+				setTimeout(function(){
+					// get the 'Post Reply' button
+					var replybtn = $('#new_post .btn-primary:visible');
+					// get the parent DIV
+					var parentdiv = replybtn.parent();
+					parentdiv[0].addEventListener("click", post_interceptor, true);
+
+					function post_interceptor (e) {
+						if ( e.target.textContent.search(/preview/i) > -1 ) {
+							//console.log('preview btn canceling');
+							var ispreview = true;
+							//return false;
+						} else {
+							var ispreview = false;
+							//console.log(e.target.textContent);
+						}
+						var errmsg = improvedPT.validate_bbcode();
+						if ( errmsg ) {
+							e.stopPropagation();
+							e.preventDefault();
+							improvedPT.show_bbcode_warning(errmsg,
+																						 e, 
+																						 ispreview,
+																						 parentdiv,
+																						 force_post, 
+																						 prevent_post);
+						}
+					}
+
+					function force_post (e, parentdiv, ispreview) {
+						//console.log('force_post running');
+						parentdiv[0].removeEventListener("click", post_interceptor, true);
+						if ( ispreview ) {
+							//console.log('ispreview, restoring listener');
+							e.target.onclick = restoreListener;
+						}
+						e.target.click();
+					}
+
+					function prevent_post (e) {
+						//console.log('prevent_post running');
+					}
+
+					function restoreListener () {
+						parentdiv[0].addEventListener("click", post_interceptor, true);
+					}
+
+				}, 1000);
+			}
+
+
+
+
+
+
+
+
+
+
+
+
 		});
 	};
 	improvedPT.overrideMTBtns = function () {
