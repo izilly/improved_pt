@@ -1,3 +1,6 @@
+2.0.2.1
+prevent adding multiple eventListeners to buttons
+
 2.0.2.0
 Fixed error occurring when a Closed Thread loads (without Post Reply/Preview buttons)
 
