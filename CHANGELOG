@@ -1,3 +1,6 @@
+2.0.2.1
+Fix for BBCode Validation click handlers building up on Reply/Preview buttons.
+
 2.0.2.0
 Fixed error occurring when a Closed Thread loads (without Post Reply/Preview buttons)
 

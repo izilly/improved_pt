@@ -708,18 +708,21 @@ var improvedPT = {};
 					};
 					restoreListener = function () {
 						parentDiv[0].addEventListener("click", postInterceptor, true);
+						parentDiv[0].setAttribute('data-hasclickhandler', 'true');
 					};
 					forcePost = function (e, parentDiv, isPreview) {
 						//console.log('force_post running');
 						parentDiv[0].removeEventListener("click", postInterceptor, true);
+						parentDiv[0].setAttribute('data-hasclickhandler', 'false');
 						if (isPreview) {
 							//console.log('isPreview, restoring listener');
 							e.target.onclick = restoreListener;
 						}
 						e.target.click();
 					};
-					if (typeof parentDiv[0] !== 'undefined') {
+					if (typeof parentDiv[0] !== 'undefined' && parentDiv[0].getAttribute('data-hasclickhandler') !== 'true') {
 						parentDiv[0].addEventListener("click", postInterceptor, true);
+						parentDiv[0].setAttribute('data-hasclickhandler', 'true');
 					}
 				}, 1000);
 			}
