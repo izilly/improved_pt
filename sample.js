@@ -718,7 +718,9 @@ var improvedPT = {};
 						}
 						e.target.click();
 					};
-					parentDiv[0].addEventListener("click", postInterceptor, true);
+					if (typeof parentDiv[0] !== 'undefined') {
+						parentDiv[0].addEventListener("click", postInterceptor, true);
+					}
 				}, 1000);
 			}
 		});
