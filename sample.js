@@ -718,8 +718,9 @@ var improvedPT = {};
 						}
 						e.target.click();
 					};
-					if (typeof parentDiv[0] !== 'undefined') {
+					if (typeof parentDiv[0] !== 'undefined' && !parentDiv.data('hasListener') ) {
 						parentDiv[0].addEventListener("click", postInterceptor, true);
+						parentDiv.data('hasListener', true);
 					}
 				}, 1000);
 			}
