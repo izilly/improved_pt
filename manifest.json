@@ -28,11 +28,15 @@
     "name": "Improved PT",
     "options_ui": {
         "page": "options/options_ui.html",
-        "chrome_style": true,
         "open_in_tab": true
     },
     "options_page": "options/options.html",
     "permissions": ["http://*.phantasytour.com/*", "https://*.phantasytour.com/*", "contextMenus", "tabs", "storage", "activeTab"],
     "version": "2.0.2.1",
+    "applications": {
+        "gecko": {
+            "id": "improved_pt@improved_pt.org"
+        }
+    },
     "manifest_version": 2
 }
