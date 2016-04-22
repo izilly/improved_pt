@@ -19,6 +19,9 @@ chrome.runtime.onMessage.addListener(
 			} else {
 				sendResponse({setShow: localStorage.show, setColor: localStorage.color, setVideo: localStorage.video, setQuotes: localStorage.quotes, setReload: localStorage.reload, setScroll: localStorage.scroll, setSfw: localStorage.sfw, setValidateBB: localStorage.validatebb});
 			}
+			chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+				chrome.tabs.insertCSS(tabs[0].id, {code: '.xbbcode-code, .xbbcode-mono{white-space: pre-wrap; font-size: 0.84615em; font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;}'});
+			});
 			return true;
 		} else if (request.set === "index") {//console.log('background.js received index request');
 			if (typeof chrome.storage.sync !== 'undefined') {
@@ -44,6 +47,15 @@ chrome.runtime.onMessage.addListener(
 							chrome.runtime.sendMessage({action: "loadPrintPage", tableHead: tableHead, tableBody: tableBody});
 						}
 					});
+					sendResponse({tab: tab});
+				});
+			});
+		} else if (request.set === "options") {//console.log('background.js received print request');
+			chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+				//var url = "data:text/html," + encodeURIComponent(request.html),
+				var index = tabs[0].index + 1;
+				chrome.tabs.create({index: index, url: chrome.extension.getURL("options/options.html")}, function (tab) {
+					
 					sendResponse({tab: tab});
 				});
 			});

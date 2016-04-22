@@ -125,10 +125,35 @@ var XBBCODE = (function() {
 
         "code": {
             openTag: function(params,content) {
-                return '<span class="xbbcode-code">';
+                if (typeof content === 'undefined' || typeof content !== 'undefined' && content.replace(/\s\r\n/g, '').length === 0) {
+                    return '[code]';
+                } else {
+                    return '<span class="xbbcode-code">';
+                }
             },
             closeTag: function(params,content) {
-                return '</span>';
+                if (typeof content === 'undefined' || typeof content !== 'undefined' && content.replace(/\s\r\n/g, '').length === 0) {
+                    return '[/code]';
+                } else {
+                    return '</span>';
+                }
+            },
+            noParse: true
+        },
+        "mono": {
+            openTag: function(params,content) {
+                if (typeof content === 'undefined' || typeof content !== 'undefined' && content.replace(/\s\r\n/g, '').length === 0) {
+                    return '[mono]';
+                } else {
+                    return '<span class="xbbcode-mono">';
+                }
+            },
+            closeTag: function(params,content) {
+                if (typeof content === 'undefined' || typeof content !== 'undefined' && content.replace(/\s\r\n/g, '').length === 0) {
+                    return '[/mono]';
+                } else {
+                    return '</span>';
+                }
             },
             noParse: true
         },

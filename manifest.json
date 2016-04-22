@@ -27,12 +27,16 @@
     },
     "name": "Improved PT",
     "options_ui": {
-        "page": "options/options_ui.html",
+        "page": "options/options.html",
         "chrome_style": true,
         "open_in_tab": true
     },
-    "options_page": "options/options.html",
     "permissions": ["http://*.phantasytour.com/*", "https://*.phantasytour.com/*", "contextMenus", "tabs", "storage", "activeTab"],
-    "version": "2.0.2.1",
-    "manifest_version": 2
+    "version": "2.0.2.2",
+    "manifest_version": 2,
+    "applications": {
+        "gecko": {
+            "id": "improved_pt@improved_pt.org"
+        }
+    }
 }

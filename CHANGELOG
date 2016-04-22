@@ -1,3 +1,6 @@
+2.0.2.2
+Experimental [mono][/mono] tag support for code and other stuff
+
 2.0.2.1
 Fix for BBCode Validation click handlers building up on Reply/Preview buttons.
 

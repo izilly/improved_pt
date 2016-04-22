@@ -124,6 +124,15 @@ var improvedPT = {};
 			});
 		}
 	};
+	improvedPT.addOptionsLink = function () {
+		if ($('#topMenuBar_iptoptions_menuItem').length < 1) {
+			$("#topMenuBar_profile_menuItem").after('<li class="yuimenubaritem session_menu_item" id="topMenuBar_iptoptions_menuItem" groupindex="0" index="8"><a href="#" class="yuimenubaritemlabel">Options</a></li>');
+			$('#topMenuBar_iptoptions_menuItem a').on('click', function (e) {
+				e.preventDefault();
+				chrome.runtime.sendMessage({set: "options"});
+			}).css('cursor', 'pointer');
+		}
+	};
 	improvedPT.addScrollDown = function () {
 		if ($('#scrollDown').length < 1) {
 			$(".topic_header .mod_tools > a:last").after('<span class="usr_tools"><a href="#" id="scrollDown" title="Go Down">Down</a></span>');
@@ -349,6 +358,7 @@ var improvedPT = {};
 
 			document.addEventListener('pt-thread-posts-loaded', function () {
 				improvedPT.checkMT();
+				improvedPT.addOptionsLink();
 				improvedPT.addScrollDown();
 				improvedPT.addBumpThread();
 				improvedPT.addPrintThread();
@@ -576,7 +586,9 @@ var improvedPT = {};
 					$('button[data-bind*="click: onPreview"]').after($('button[data-bind*="click: onPreview"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'previewReplyBtn')).hide();
 				}
 				$(document).off('click', '#postReplyBtn').on("click", '#postReplyBtn', function(e) {
-					var errorHTML;
+					var myRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/i,
+						myQtyRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/ig,
+						errorHTML, isMonoBlock, isCodeBlock, monoBlock, processedMonoBlock, monoBlockQty, i, postBody, restoreHtml5Doctype, nonMonoBlock, processedNonMonoBlock, nonMonoBlockQty, startsWithHtmlTag, endsWithHtmlTag;
 					e.preventDefault;
 					$(this).val("Posting...").attr('disabled', 'disabled');
 					$("#errorExplanation").remove();
@@ -599,7 +611,62 @@ var improvedPT = {};
 						$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 						return false;
 					}
-					$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/posts", {"Body": DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true}), "ThreadId": DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true})}, function() {
+					postBody = $("#new_post textarea").val();
+					monoBlockQty = postBody.match(myQtyRegExp);
+					if (monoBlockQty !== null && monoBlockQty.length > 0) {
+						for (i = 0; i < monoBlockQty.length; i += 1) {
+							isMonoBlock = false; isCodeBlock = false;
+							monoBlock = postBody.match(myRegExp);
+							//console.log(monoBlock);
+							//console.log(monoBlockQty);
+							if (monoBlock !== null && monoBlock.length > 1 && monoBlock[1].replace(/\s\r\n/g, '') !== '[mono][/mono]' && monoBlock[1].replace(/\s\r\n/g, '') !== '[code][/code]') {
+								postBody = postBody.replace(monoBlock[1], '{temp-bbcode-replacement-placeholder}');
+								if (monoBlock[1].indexOf('[mono]') > -1) {
+									monoBlock[1] = monoBlock[1].replace('[mono]', '');
+									monoBlock[1] = monoBlock[1].replace('[/mono]', '');
+									isMonoBlock = true;
+								} else 	if (monoBlock[1].indexOf('[code]') > -1) {
+									monoBlock[1] = monoBlock[1].replace('[code]', '');
+									monoBlock[1] = monoBlock[1].replace('[/code]', '');
+									isCodeBlock = true;
+								}
+								restoreHtml5Doctype = false, startsWithHtmlTag = false, endsWithHtmlTag = false;
+								if (monoBlock[1].indexOf('<!DOCTYPE html>') > -1) {restoreHtml5Doctype = true;}
+								if (monoBlock[1].substring(0, 6) == '<html>') {startsWithHtmlTag = true;}
+								if (monoBlock[1].substr(- '</html>'.length) === '</html>') {endsWithHtmlTag = true;}
+								monoBlock[1] = DOMPurify.sanitize(monoBlock[1], {SAFE_FOR_JQUERY: true, WHOLE_DOCUMENT: true, ADD_TAGS: ['link', 'script']});
+								if (restoreHtml5Doctype === true) {monoBlock[1] = '<!DOCTYPE html>\n' + monoBlock[1];}
+								if (startsWithHtmlTag === false) {monoBlock[1] = monoBlock[1].replace(/^(<html>\r?\n?\t?<head><\/head><body>\r?\n?\t?\s?)/, '');}
+								if (endsWithHtmlTag === false) {monoBlock[1] = monoBlock[1].replace(/(\r?\n?\t?<\/body>\r?\n?\t?<\/html>)$/, '');}
+								monoBlock[1] = monoBlock[1].replace('<html><head>', '<html>\n\t<head>');
+								monoBlock[1] = monoBlock[1].replace('</body></html>', '\t</body>\n</html>');
+								if (isMonoBlock) {
+									monoBlock[1] = '[mono]' + monoBlock[1] + '[/mono]';
+								} else if (isCodeBlock) {
+									monoBlock[1] = '[code]' + monoBlock[1] + '[/code]';
+								}
+								//processedMonoBlock = XBBCODE.process({text: monoBlock[1], removeMisalignedTags: false, addInLineBreaks: true});
+								//console.log(processedMonoBlock.html);
+								postBody = postBody.replace('{temp-bbcode-replacement-placeholder}', monoBlock[1]);
+							}
+						}
+					}
+					myRegExp = /(?:^|\[\/mono\]|\[\/code\])((?!\[mono\]|\[\/mono\])[^]*?|(?!\[code\]|\[\/code\])[^]*?|)(?:\[mono\]|\[code\]|$)/i;
+					myQtyRegExp = /(?:^|\[\/mono\]|\[\/code\])((?!\[mono\]|\[\/mono\])[^]*?|(?!\[code\]|\[\/code\])[^]*?|)(?:\[mono\]|\[code\]|$)/ig;
+					nonMonoBlockQty = postBody.match(myQtyRegExp);
+					if (nonMonoBlockQty !== null && nonMonoBlockQty.length > 0) {
+						for (i = 0; i < nonMonoBlockQty.length; i += 1) {
+							nonMonoBlock = postBody.match(myRegExp);
+							//console.log(nonMonoBlock);
+							//console.log(nonMonoBlockQty);
+							if (nonMonoBlock !== null && nonMonoBlock.length > 1) {
+								postBody = postBody.replace(nonMonoBlock[1], '{temp-bbcode-replacement-placeholder}');
+								nonMonoBlock[1] = DOMPurify.sanitize(nonMonoBlock[1], {SAFE_FOR_JQUERY: true});
+								postBody = postBody.replace('{temp-bbcode-replacement-placeholder}', nonMonoBlock[1]);
+							}
+						}
+					}
+					$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/posts", {"Body": postBody, "ThreadId": DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true})}, function() {
 						improvedPT.mt = true;
 						$("#new_post textarea").val("");
 						$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
@@ -607,7 +674,9 @@ var improvedPT = {};
 					});
 				});
 				$(document).off('click', '#previewReplyBtn').on("click", '#previewReplyBtn', function(e) {
-					var errorHTML, message, messageBody;
+					var myRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/i,
+						myQtyRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/ig,
+						errorHTML, message, messageBody, isMonoBlock, isCodeBlock, monoBlock, processedMonoBlock, monoBlockQty, i, postBody, restoreHtml5Doctype, nonMonoBlock, processedNonMonoBlock, nonMonoBlockQty, startsWithHtmlTag, endsWithHtmlTag;
 					e.preventDefault;
 					$(this).val("Previewing...").attr('disabled', 'disabled');
 					$("#errorExplanation").remove();
@@ -630,8 +699,65 @@ var improvedPT = {};
 						$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 						return false;
 					}
-					message = DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true});
-					messageBody = XBBCODE.process({text: message, removeMisalignedTags: false, addInLineBreaks: true});
+					postBody = $("#new_post textarea").val();
+					monoBlockQty = postBody.match(myQtyRegExp);
+					if (monoBlockQty !== null && monoBlockQty.length > 0) {
+						for (i = 0; i < monoBlockQty.length; i += 1) {
+							isMonoBlock = false; isCodeBlock = false;
+							monoBlock = postBody.match(myRegExp);
+							//console.log(monoBlock);
+							//console.log(monoBlockQty);console.log(monoBlock[1].replace(/\s\r\n/g, ''));
+							if (monoBlock !== null && monoBlock.length > 1 && monoBlock[1].replace(/\s\r\n/g, '') !== '[mono][/mono]' && monoBlock[1].replace(/\s\r\n/g, '') !== '[code][/code]') {
+								postBody = postBody.replace(monoBlock[1], '{temp-bbcode-replacement-placeholder}');
+								if (monoBlock[1].indexOf('[mono]') > -1) {
+									monoBlock[1] = monoBlock[1].replace('[mono]', '');
+									monoBlock[1] = monoBlock[1].replace('[/mono]', '');
+									isMonoBlock = true;
+								} else 	if (monoBlock[1].indexOf('[code]') > -1) {
+									monoBlock[1] = monoBlock[1].replace('[code]', '');
+									monoBlock[1] = monoBlock[1].replace('[/code]', '');
+									isCodeBlock = true;
+								}
+								restoreHtml5Doctype = false, startsWithHtmlTag = false, endsWithHtmlTag = false;
+								if (monoBlock[1].indexOf('<!DOCTYPE html>') > -1) {restoreHtml5Doctype = true;}
+								if (monoBlock[1].substring(0, 6) == '<html>') {startsWithHtmlTag = true;}
+								if (monoBlock[1].substr(- '</html>'.length) === '</html>') {endsWithHtmlTag = true;}
+								monoBlock[1] = DOMPurify.sanitize(monoBlock[1], {SAFE_FOR_JQUERY: true, WHOLE_DOCUMENT: true, ADD_TAGS: ['link', 'script']});
+								if (restoreHtml5Doctype === true) {monoBlock[1] = '<!DOCTYPE html>\n' + monoBlock[1];}
+								if (startsWithHtmlTag === false) {monoBlock[1] = monoBlock[1].replace(/^(<html>\r?\n?\t?<head><\/head><body>\r?\n?\t?\s?)/, '');}
+								if (endsWithHtmlTag === false) {monoBlock[1] = monoBlock[1].replace(/(\r?\n?\t?<\/body>\r?\n?\t?<\/html>)$/, '');}
+								monoBlock[1] = monoBlock[1].replace('<html><head>', '<html>\n\t<head>');
+								monoBlock[1] = monoBlock[1].replace('</body></html>', '\t</body>\n</html>');
+								if (isMonoBlock) {
+									monoBlock[1] = '[mono]' + monoBlock[1] + '[/mono]';
+								} else if (isCodeBlock) {
+									monoBlock[1] = '[code]' + monoBlock[1] + '[/code]';
+								}
+								//processedMonoBlock = XBBCODE.process({text: monoBlock[1], removeMisalignedTags: false, addInLineBreaks: true});
+								//console.log(processedMonoBlock.html);
+								postBody = postBody.replace('{temp-bbcode-replacement-placeholder}', monoBlock[1]);
+							}
+						}
+					}
+					myRegExp = /(?:^|\[\/mono\]|\[\/code\])((?!\[mono\]|\[\/mono\])[^]*?|(?!\[code\]|\[\/code\])[^]*?|)(?:\[mono\]|\[code\]|$)/i;
+					myQtyRegExp = /(?:^|\[\/mono\]|\[\/code\])((?!\[mono\]|\[\/mono\])[^]*?|(?!\[code\]|\[\/code\])[^]*?|)(?:\[mono\]|\[code\]|$)/ig;
+					nonMonoBlockQty = postBody.match(myQtyRegExp);
+					if (nonMonoBlockQty !== null && nonMonoBlockQty.length > 0) {
+						for (i = 0; i < nonMonoBlockQty.length; i += 1) {
+							nonMonoBlock = postBody.match(myRegExp);
+							//console.log(nonMonoBlock);
+							//console.log(nonMonoBlockQty);
+							if (nonMonoBlock !== null && nonMonoBlock.length > 1) {
+								postBody = postBody.replace(nonMonoBlock[1], '{temp-bbcode-replacement-placeholder}');
+								nonMonoBlock[1] = DOMPurify.sanitize(nonMonoBlock[1], {SAFE_FOR_JQUERY: true});
+								postBody = postBody.replace('{temp-bbcode-replacement-placeholder}', nonMonoBlock[1]);
+							}
+						}
+					}
+
+					//message = DOMPurify.sanitize(postBody, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['link', 'script']});
+					//console.log(postBody);
+					messageBody = XBBCODE.process({text: postBody, removeMisalignedTags: false, addInLineBreaks: true});
 					BootstrapDialog.show({
 						title: 'Your thoughts...',
 						message: messageBody.html,
@@ -726,6 +852,35 @@ var improvedPT = {};
 					}
 				}, 1000);
 			}
+			/* replace [mono][/mono] tags */
+			$('.post_body_container').each(function () {
+				var postBody = $(this).html(),
+					myRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/i,
+					myQtyRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/ig,
+				monoBlock, processedMonoBlock, monoBlockQty, i;
+				monoBlockQty = postBody.match(myQtyRegExp);
+				if (monoBlockQty !== null && monoBlockQty.length > 0) {
+					for (i = 0; i < monoBlockQty.length; i += 1) {
+						monoBlock = postBody.match(myRegExp);
+						//console.log(monoBlock);
+						//console.log(monoBlockQty);
+						if (monoBlock !== null && monoBlock.length > 1 && monoBlock[1].replace(/\s\r\n/g, '') !== '[mono][/mono]' && monoBlock[1].replace(/\s\r\n/g, '') !== '[code][/code]') {
+							postBody = postBody.replace(monoBlock[1], '{temp-bbcode-replacement-placeholder}');
+							processedMonoBlock = XBBCODE.process({text: monoBlock[1], removeMisalignedTags: false, addInLineBreaks: true});
+							//console.log(processedMonoBlock.html);
+							postBody = postBody.replace('{temp-bbcode-replacement-placeholder}', processedMonoBlock.html.replace(/&lt;br\s*[\/]?&gt;/gi, '\n'));
+							$(this).html(postBody);
+						}
+					}
+				}
+				$('.post_body_container').find('span.xbbcode-code').each(function (i) {
+					if ($(this).text() === '') {
+						$(this).before('[code][/code]');
+						$(this).remove();
+					}
+				});
+			});
+
 		});
 	};
 	improvedPT.overrideMTBtns = function () {
