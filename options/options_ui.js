@@ -9,17 +9,21 @@ function save_options() {
 		scroll = DOMPurify.sanitize(document.getElementById('scroll').value, {SAFE_FOR_JQUERY: true}),
 		sfw = DOMPurify.sanitize(document.getElementById('sfw').value, {SAFE_FOR_JQUERY: true}),
 		validatebb = DOMPurify.sanitize(document.getElementById('validatebb').value, {SAFE_FOR_JQUERY: true});
-	chrome.storage.sync.set({
-		show: show,
-		color: color,
-		quotes: quotes,
-		video: video,
-		reload: reload,
-		first: first,
-		scroll: scroll,
-		sfw: sfw,
-		validatebb: validatebb
-	}, function() {
+
+	chrome.runtime.sendMessage({
+		set: "setopts",
+		items: {
+			show: show,
+			color: color,
+			quotes: quotes,
+			video: video,
+			reload: reload,
+			first: first,
+			scroll: scroll,
+			sfw: sfw,
+			validatebb: validatebb
+		}
+	}, function () {
 		// Update status to let user know options were saved.
 		var status = document.getElementById('status');
 		status.textContent = 'Options saved.';
@@ -32,17 +36,8 @@ function save_options() {
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.
 function restore_options() {
-	// Use default value color = 'red' and likesColor = true.
-	chrome.storage.sync.get({
-		show: 'click',
-		color: '0000FF',
-		quotes: 'qno',
-		video: 'vclick',
-		reload: 'true',
-		first: 'false',
-		scroll: 'true',
-		sfw: 'false',
-		validatebb: 'true'
+	chrome.runtime.sendMessage({
+		set: "getopts"
 	},
 	function(items) {
 		document.getElementById('show').value = items.show;
@@ -58,9 +53,6 @@ function restore_options() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-	jscolor.init();
 	restore_options();
-	document.getElementById('color').focus();
-	document.getElementById('color').blur();
 });
 document.getElementById('saveBtn').addEventListener('click', save_options);
