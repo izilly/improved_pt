@@ -111,11 +111,21 @@ var improvedPT = {};
 			}
 		});
 	};
+	improvedPT.addOptionsLink = function () {
+		if ($('#improved_pt_options').length < 1) {
+			$("#bs-example-navbar-collapse-1 ul.nav.navbar-nav.navbar-right").prepend('<li id="improved_pt_options"><a href="#"><span data-bind="text: label">Options</span></a></li>');
+			$('#improved_pt_options a').on('click', function (e) {
+				e.preventDefault();
+				chrome.runtime.sendMessage({set: "options"});
+			}).css('cursor', 'pointer');
+		}
+	};
 	improvedPT.main = function () {
 		document.addEventListener('pt-threads-loaded', function () {
 			improvedPT.aprilFools();
 			improvedPT.alterThreadList();
 			improvedPT.showIndex();
+			improvedPT.addOptionsLink();
 		});
 	};
 	$(document).ready(function () {

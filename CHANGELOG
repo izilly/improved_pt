@@ -1,3 +1,7 @@
+2.0.2.4
+Fix for the injected extension "Options" link (after changes to PT's UI)
+Fix for Bootstrap JS conflicting with PT's already included Bootstrap JS (prevented dropdown menus in PT's new main menu from working)
+
 2.0.2.3
 Fixed SFW (Safe For Work) Mode (after changes to PT's UI).
 

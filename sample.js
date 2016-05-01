@@ -125,9 +125,9 @@ var improvedPT = {};
 		}
 	};
 	improvedPT.addOptionsLink = function () {
-		if ($('#topMenuBar_iptoptions_menuItem').length < 1) {
-			$("#topMenuBar_profile_menuItem").after('<li class="yuimenubaritem session_menu_item" id="topMenuBar_iptoptions_menuItem" groupindex="0" index="8"><a href="#" class="yuimenubaritemlabel">Options</a></li>');
-			$('#topMenuBar_iptoptions_menuItem a').on('click', function (e) {
+		if ($('#improved_pt_options').length < 1) {
+			$("#bs-example-navbar-collapse-1 ul.nav.navbar-nav.navbar-right").prepend('<li id="improved_pt_options"><a href="#"><span data-bind="text: label">Options</span></a></li>');
+			$('#improved_pt_options a').on('click', function (e) {
 				e.preventDefault();
 				chrome.runtime.sendMessage({set: "options"});
 			}).css('cursor', 'pointer');
@@ -1017,6 +1017,7 @@ var improvedPT = {};
 		});
 	};
 	$(document).ready(function () {
+		$(document).off('.data-api');
 		improvedPT.getBands();
 	});
 	$(document).on('unload', function () {
