@@ -123,6 +123,13 @@ var improvedPT = {};
 	};
 	$(document).ready(function () {
 		improvedPT.main();
+
+		setTimeout(function () {
+			var event = document.createEvent('Event');
+			event.initEvent('pt-threads-loaded', true, true); //can bubble, and is cancellable
+			document.dispatchEvent(event);
+		}, 750);
+
 	});
 	$(document).on('unload', function () {
 		if(typeof detectPTThreadLoad !== 'undefined') {detectPTThreadLoad.disconnect();}

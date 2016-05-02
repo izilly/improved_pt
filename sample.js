@@ -862,6 +862,13 @@ var improvedPT = {};
 	};
 	$(document).ready(function () {
 		improvedPT.getBands();
+
+		setTimeout(function () {
+			var event = document.createEvent('Event');
+			event.initEvent('pt-thread-posts-loaded', true, true); //can bubble, and is cancellable
+			document.dispatchEvent(event);
+		}, 750);
+
 	});
 	$(document).on('unload', function () {
 		if(typeof detectPTPostLoad !== 'undefined') {detectPTPostLoad.disconnect();}
