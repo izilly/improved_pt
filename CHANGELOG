@@ -1,3 +1,9 @@
+2.0.2.5-izilly
+update MutationObservers to work on firefox
+options_ui.html: update color picker on page load
+add storage wrapper for getting/setting options
+modify popup.js to work in firefox
+
 2.0.2.4
 Fix for the injected extension "Options" link (after changes to PT's UI)
 Fix for Bootstrap JS conflicting with PT's already included Bootstrap JS (prevented dropdown menus in PT's new main menu from working)
