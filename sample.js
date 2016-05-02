@@ -49,50 +49,53 @@ var improvedPT = {};
 		});
 	};
 
-	function waitForMutation(parentNode, isMatchFunc, handlerFunc, observeSubtree, disconnectAfterMatch) {
-		var defaultIfUndefined = function(val, defaultVal) {
-			return (typeof val === "undefined") ? defaultVal : val;
-		};
-		observeSubtree = defaultIfUndefined(observeSubtree, false);
-		disconnectAfterMatch = defaultIfUndefined(disconnectAfterMatch, false);
-		var observer = new MutationObserver(function(mutations) {
-			mutations.forEach(function(mutation) {
-				if (mutation.addedNodes) {
-					for (var i = 0; i < mutation.addedNodes.length; i++) {
-						var node = mutation.addedNodes[i];
-						if (isMatchFunc(node)) {
-							handlerFunc(node);
-							if (disconnectAfterMatch) {observer.disconnect();}
-						}
+	// setup a MutationObserver
+	// https://github.com/ryanmorr/ready
+	(function(win){
+			'use strict';
+			var listeners = [],
+			doc = document;
+			function ready(selector, fn){
+					// Store the selector and callback to be monitored
+					listeners.push({
+							selector: selector,
+							fn: fn
+					});
+					if(!win.observer){
+							// Watch for changes in the document
+							win.observer = new MutationObserver(checkListeners);
+							win.observer.observe(doc.documentElement, {
+									childList: true,
+									subtree: true
+							});
 					}
-				}
-			});
-		});
-		observer.observe(parentNode, {
-			childList: true,
-			attributes: false,
-			characterData: false,
-			subtree: observeSubtree
-		});
-	return observer;
-	}
-
-	var delayedCallToPTTheadPostsLoaded, detectPTPostLoad = waitForMutation(
-		document.querySelector("#applicationHost"),
-		function(node) {
-			if (node.nodeType === 1) { return node.querySelector("div > div > div.post") !== null;} else {return false;}
-		},
-		function() {
-			clearTimeout(delayedCallToPTTheadPostsLoaded);
-			delayedCallToPTTheadPostsLoaded = setTimeout(function () {
-				var event = document.createEvent('Event');
-				event.initEvent('pt-thread-posts-loaded', true, true); //can bubble, and is cancellable
-				document.dispatchEvent(event);
-			}, 250);
-		},
-		true,
-		false
-	);
+					// Check if the element is currently in the DOM
+					checkSelector(selector, fn);
+			}
+			function checkListeners(){
+					// Check the DOM for elements matching a stored selector
+					for(var i = 0, len = listeners.length, listener; i < len; i++){
+							listener = listeners[i];
+							checkSelector(listener.selector, listener.fn);
+					}
+			}
+			function checkSelector(selector, fn){
+					// Query for elements matching the specified selector
+					var elements = doc.querySelectorAll(selector), i = 0, len = elements.length, element;
+					for(; i < len; i++){
+							element = elements[i];
+							// Make sure the callback isn't invoked with the
+							// same element more than once
+							if(!element.ready){
+									element.ready = true;
+									// Invoke the callback with the element
+									fn.call(element, element);
+							}
+					}
+			}
+			// Expose `ready`
+			win.ready = ready;
+	})(improvedPT);
 
 	improvedPT.getBandApiUrlByWebUrl = function (bands, webUrl) {
 		var band = bands.filter(function (obj) {
@@ -344,23 +347,38 @@ var improvedPT = {};
 	improvedPT.getBands = function () {
 		$.get("https://www.phantasytour.com/api/bands", function (data) {
 			improvedPT.bands = data;
-			
+
 			improvedPT.addTheadStats();
 
 			document.addEventListener('pt-thread-posts-loaded', function () {
-				improvedPT.checkMT();
-				improvedPT.addScrollDown();
-				improvedPT.addBumpThread();
-				improvedPT.addPrintThread();
-				improvedPT.addBoldText();
-				improvedPT.addItalicText();
-				improvedPT.addBoldItalicText();
-				improvedPT.addLinkBuilder();
-				improvedPT.enableQuoteOverride();
-				improvedPT.replaceLinks();
-				improvedPT.threadShow();
-				improvedPT.overrideMTBtns();
+				console.log('*** posts-loaded: heard ***');
+				if (!improvedPT.posts_loaded_done) {
+					console.log('*** posts-loaded: running ***');
+					improvedPT.checkMT();
+					improvedPT.addScrollDown();
+					improvedPT.addBumpThread();
+					improvedPT.addPrintThread();
+					improvedPT.addBoldText();
+					improvedPT.addItalicText();
+					improvedPT.addBoldItalicText();
+					improvedPT.addLinkBuilder();
+					improvedPT.enableQuoteOverride();
+					improvedPT.replaceLinks();
+					improvedPT.threadShow();
+					improvedPT.overrideMTBtns();
+					// prevent handler from running more than once.
+					improvedPT.posts_loaded_done = true;
+				}
 			});
+			// observe mutations on querySelector that matches posts
+			improvedPT.ready("#applicationHost div > div > div.post:last-child",
+					function(element){
+						console.log('*** posts-loaded: dispatching event ***');
+						var event = document.createEvent('Event');
+						event.initEvent('pt-thread-posts-loaded', true, true);
+						document.dispatchEvent(event);
+					}
+			);
 		});
 		improvedPT.addMessageListener();
 	};
@@ -862,13 +880,6 @@ var improvedPT = {};
 	};
 	$(document).ready(function () {
 		improvedPT.getBands();
-
-		setTimeout(function () {
-			var event = document.createEvent('Event');
-			event.initEvent('pt-thread-posts-loaded', true, true); //can bubble, and is cancellable
-			document.dispatchEvent(event);
-		}, 750);
-
 	});
 	$(document).on('unload', function () {
 		if(typeof detectPTPostLoad !== 'undefined') {detectPTPostLoad.disconnect();}

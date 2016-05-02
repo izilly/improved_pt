@@ -2,50 +2,54 @@ var improvedPT = {};
 (function ($) {
 	"use strict";
 
-	function waitForMutation(parentNode, isMatchFunc, handlerFunc, observeSubtree, disconnectAfterMatch) {
-		var defaultIfUndefined = function(val, defaultVal) {
-			return (typeof val === "undefined") ? defaultVal : val;
-		};
-		observeSubtree = defaultIfUndefined(observeSubtree, false);
-		disconnectAfterMatch = defaultIfUndefined(disconnectAfterMatch, false);
-		var observer = new MutationObserver(function(mutations) {
-			mutations.forEach(function(mutation) {
-				if (mutation.addedNodes) {
-					for (var i = 0; i < mutation.addedNodes.length; i++) {
-						var node = mutation.addedNodes[i];
-						if (isMatchFunc(node)) {
-							handlerFunc(node);
-							if (disconnectAfterMatch) {observer.disconnect();}
-						}
+	// setup a MutationObserver
+	// https://github.com/ryanmorr/ready
+	(function(win){
+			'use strict';
+			var listeners = [],
+			doc = document;
+			function ready(selector, fn){
+					// Store the selector and callback to be monitored
+					listeners.push({
+							selector: selector,
+							fn: fn
+					});
+					if(!win.observer){
+							// Watch for changes in the document
+							win.observer = new MutationObserver(checkListeners);
+							win.observer.observe(doc.documentElement, {
+									childList: true,
+									subtree: true
+							});
 					}
-				}
-			});
-		});
-		observer.observe(parentNode, {
-			childList: true,
-			attributes: false,
-			characterData: false,
-			subtree: observeSubtree
-		});
-	return observer;
-	}
+					// Check if the element is currently in the DOM
+					checkSelector(selector, fn);
+			}
+			function checkListeners(){
+					// Check the DOM for elements matching a stored selector
+					for(var i = 0, len = listeners.length, listener; i < len; i++){
+							listener = listeners[i];
+							checkSelector(listener.selector, listener.fn);
+					}
+			}
+			function checkSelector(selector, fn){
+					// Query for elements matching the specified selector
+					var elements = doc.querySelectorAll(selector), i = 0, len = elements.length, element;
+					for(; i < len; i++){
+							element = elements[i];
+							// Make sure the callback isn't invoked with the
+							// same element more than once
+							if(!element.ready){
+									element.ready = true;
+									// Invoke the callback with the element
+									fn.call(element, element);
+							}
+					}
+			}
+			// Expose `ready`
+			win.ready = ready;
+	})(improvedPT);
 
-	var delayedCallToPTThreadsLoaded, detectPTThreadLoad = waitForMutation(
-		document.querySelector("#applicationHost"),
-		function(node) {
-			if (node.nodeType === 1) { return node.querySelector("#threads_table > tbody > tr") !== null;} else {return false;}
-		},
-		function() {
-			clearTimeout(delayedCallToPTThreadsLoaded);
-			delayedCallToPTThreadsLoaded = setTimeout(function () {
-				var event = document.createEvent('Event');
-				event.initEvent('pt-threads-loaded', true, true); //can bubble, and is cancellable
-				document.dispatchEvent(event);
-			}, 250);
-		},
-		true,
-		false
-	);
 
 	// April fools day shit
 	// if you're reading my source code, don't tell anyone about the shenanigans. feel free to contact me and i'll validate your awesomeness
@@ -116,22 +120,27 @@ var improvedPT = {};
 	};
 	improvedPT.main = function () {
 		document.addEventListener('pt-threads-loaded', function () {
-			improvedPT.aprilFools();
-			improvedPT.alterThreadList();
-			improvedPT.showIndex();
+			console.log('*** threads-loaded: heard ***');
+			if (!improvedPT.threads_loaded_done) {
+				console.log('*** threads-loaded: running ***');
+				improvedPT.aprilFools();
+				improvedPT.alterThreadList();
+				improvedPT.showIndex();
+				// prevent handler from running more than once.
+				improvedPT.threads_loaded_done = true;
+			}
 		});
+		// observe mutations on querySelector that matches threads in threadlist
+		improvedPT.ready("#threads_table > tbody > tr:last-child",
+				function(element){
+					console.log('*** threads-loaded: dispatching event ***');
+					var event = document.createEvent('Event');
+					event.initEvent('pt-threads-loaded', true, true);
+					document.dispatchEvent(event);
+				}
+		);
 	};
 	$(document).ready(function () {
 		improvedPT.main();
-
-		setTimeout(function () {
-			var event = document.createEvent('Event');
-			event.initEvent('pt-threads-loaded', true, true); //can bubble, and is cancellable
-			document.dispatchEvent(event);
-		}, 750);
-
-	});
-	$(document).on('unload', function () {
-		if(typeof detectPTThreadLoad !== 'undefined') {detectPTThreadLoad.disconnect();}
 	});
 }(jQuery));
