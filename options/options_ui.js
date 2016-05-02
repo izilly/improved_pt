@@ -41,7 +41,11 @@ function restore_options() {
 	},
 	function(items) {
 		document.getElementById('show').value = items.show;
-		document.getElementById('color').value = items.color;
+		var jspicker = document.getElementById('color');
+		jspicker.value = items.color;
+		if (typeof jspicker.jscolor !== 'undefined') {
+			jspicker.jscolor.fromString(items.color);
+		}
 		document.getElementById('quotes').value = items.quotes;
 		document.getElementById('video').value = items.video;
 		document.getElementById('reload').value = items.reload;
