@@ -126,7 +126,7 @@ chrome.runtime.onMessage.addListener(
 			chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
 				//var url = "data:text/html," + encodeURIComponent(request.html),
 				var index = tabs[0].index + 1, optionsHref, isFirefox = typeof InstallTrigger !== 'undefined';
-				optionsHref = (isFirefox) ? "options/options.html" : "options/options_ui.html";
+				optionsHref = "options/options_ui.html";
 				chrome.tabs.create({index: index, url: chrome.extension.getURL(optionsHref)}, function (tab) {
 					sendResponse({tab: tab});
 				});

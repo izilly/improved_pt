@@ -1,3 +1,6 @@
+2.0.2.6
+remove options.html; use options_ui.html for everything.
+
 2.0.2.5
 update MutationObservers to work on firefox
 options_ui.html: update color picker on page load
