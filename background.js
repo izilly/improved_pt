@@ -3,7 +3,7 @@ function getStorageWrapper () {
 	var wrapper = {};
 	wrapper.defaultOptions = {
 						show: 'click',
-						color: 'ABC0FF',
+						color: '0000FF',
 						quotes: 'qno',
 						video: 'vclick',
 						reload: 'true',
