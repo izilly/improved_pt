@@ -98,6 +98,9 @@ chrome.runtime.onMessage.addListener(
 				var items = {setShow: opts.show, setColor: opts.color, setVideo: opts.video, setQuotes: opts.quotes, setReload: opts.reload, setScroll: opts.scroll, setSfw: opts.sfw, setValidateBB: opts.validatebb};
 				sendResponse(items);
 			});
+			chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+				chrome.tabs.insertCSS(tabs[0].id, {code: '.xbbcode-code, .xbbcode-mono{white-space: pre-wrap; font-size: 0.84615em; font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;}'});
+			});
 			return true;
 		} else if (request.set === "index") {
 			storageWrapper.get({first: false, sfw: false}, function(opts) {
@@ -116,6 +119,15 @@ chrome.runtime.onMessage.addListener(
 							chrome.runtime.sendMessage({action: "loadPrintPage", tableHead: tableHead, tableBody: tableBody});
 						}
 					});
+					sendResponse({tab: tab});
+				});
+			});
+		} else if (request.set === "options") {//console.log('background.js received print request');
+			chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+				//var url = "data:text/html," + encodeURIComponent(request.html),
+				var index = tabs[0].index + 1, optionsHref, isFirefox = typeof InstallTrigger !== 'undefined';
+				optionsHref = (isFirefox) ? "options/options.html" : "options/options_ui.html";
+				chrome.tabs.create({index: index, url: chrome.extension.getURL(optionsHref)}, function (tab) {
 					sendResponse({tab: tab});
 				});
 			});

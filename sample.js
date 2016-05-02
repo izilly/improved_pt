@@ -127,6 +127,15 @@ var improvedPT = {};
 			});
 		}
 	};
+	improvedPT.addOptionsLink = function () {
+		if ($('#improved_pt_options').length < 1) {
+			$("#bs-example-navbar-collapse-1 ul.nav.navbar-nav.navbar-right").prepend('<li id="improved_pt_options"><a href="#"><span data-bind="text: label">Options</span></a></li>');
+			$('#improved_pt_options a').on('click', function (e) {
+				e.preventDefault();
+				chrome.runtime.sendMessage({set: "options"});
+			}).css('cursor', 'pointer');
+		}
+	};
 	improvedPT.addScrollDown = function () {
 		if ($('#scrollDown').length < 1) {
 			$(".topic_header .mod_tools > a:last").after('<span class="usr_tools"><a href="#" id="scrollDown" title="Go Down">Down</a></span>');
@@ -355,6 +364,7 @@ var improvedPT = {};
 				if (!improvedPT.posts_loaded_done) {
 					console.log('*** posts-loaded: running ***');
 					improvedPT.checkMT();
+					improvedPT.addOptionsLink();
 					improvedPT.addScrollDown();
 					improvedPT.addBumpThread();
 					improvedPT.addPrintThread();
@@ -572,6 +582,117 @@ var improvedPT = {};
 			}]
 		});
 	};
+	improvedPT.enableBBCodeMonoCodeSupport = function (postBody, bbCodeTagName, preserveBBCodes) {
+		var myRegExp,
+			myQtyRegExp,
+			myRepRegExp,
+			myRepRegExp2,
+			strippedBBCodeTagNameWrap, strippedPreserveBBCodesWraps = [], preserveBBCodesRegExString, preserveBBCodesRegExString1, preserveBBCodesRegExString2, preserveBBCodesRegExString3, monoBlock, processedMonoBlock, monoBlockQty, i, ii, postBody, restoreHtml5Doctype, nonMonoBlock, processedNonMonoBlock, nonMonoBlockQty, startsWithHtmlTag, endsWithHtmlTag;
+			//myRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\])(?:[^]*?)/i;
+			//myQtyRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\])(?:[^]*?)/ig;
+			//myRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/i;
+			//myQtyRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/ig;
+		if (preserveBBCodes.length < 1) {
+			myRegExp = new RegExp("(?:[^]*?)(\\[" + bbCodeTagName + "\\](?!\\[" + bbCodeTagName + "\\])[^]*?\\[\\/" + bbCodeTagName + "\\])(?:[^]*?)", "i");
+			myQtyRegExp = new RegExp("(?:[^]*?)(\\[" + bbCodeTagName + "\\](?!\\[" + bbCodeTagName + "\\])[^]*?\\[\\/" + bbCodeTagName + "\\])(?:[^]*?)", "ig");
+		} else {
+			preserveBBCodesRegExString = '';
+			for (i = 0; i < preserveBBCodes.length; i += 1) {
+				preserveBBCodesRegExString = "|\\[" + preserveBBCodes[i] + "\\](?!\\[" + preserveBBCodes[i] + "\\])[^]*?\\[\\/" + preserveBBCodes[i] + "\\]";
+			}
+			myRegExp = new RegExp("(?:[^]*?)(\\[" + bbCodeTagName + "\\](?!\\[" + bbCodeTagName + "\\])[^]*?\\[\\/" + bbCodeTagName + preserveBBCodesRegExString + ")(?:[^]*?)", "i");
+			myQtyRegExp = new RegExp("(?:[^]*?)(\\[" + bbCodeTagName + "\\](?!\\[" + bbCodeTagName + "\\])[^]*?\\[\\/" + bbCodeTagName + preserveBBCodesRegExString + ")(?:[^]*?)", "ig");
+		}
+		//console.log(myRegExp);console.log(myQtyRegExp);
+		monoBlockQty = postBody.match(myQtyRegExp);
+		if (monoBlockQty !== null && monoBlockQty.length > 0) {
+			for (i = 0; i < monoBlockQty.length; i += 1) {
+				monoBlock = postBody.match(myRegExp);
+				//console.log(monoBlock);
+				//console.log(monoBlockQty);console.log(monoBlock[1].replace(/\s\r\n/g, ''));
+				if (monoBlock !== null && monoBlock.length > 1 && monoBlock[1].replace(/\s\r\n/g, '') !== '[' + bbCodeTagName + '][/' + bbCodeTagName + ']') {
+					postBody = postBody.replace(monoBlock[1], '{temp-bbcode-replacement-placeholder}');
+					strippedBBCodeTagNameWrap = false;
+					myRepRegExp = new RegExp("^\\[" + bbCodeTagName + "\\]", "i");
+					myRepRegExp2 = new RegExp("\\[\\/" + bbCodeTagName + "\\]$", "i");
+					if (myRepRegExp.test(monoBlock[1]) && myRepRegExp2.test(monoBlock[1])) {
+						monoBlock[1] = monoBlock[1].replace(myRepRegExp, '');
+						monoBlock[1] = monoBlock[1].replace(myRepRegExp2, '');
+						strippedBBCodeTagNameWrap = true;
+					}
+					
+					
+					
+					if (preserveBBCodes.length > 0) {
+						strippedPreserveBBCodesWraps = [];
+						for (ii = 0; ii < preserveBBCodes.length; ii += 1) {
+							myRepRegExp = new RegExp("^\\[" + preserveBBCodes[ii] + "\\]", "i");
+							myRepRegExp2 = new RegExp("\\[\\/" + preserveBBCodes[ii] + "\\]$", "i");
+							if (myRepRegExp.test(monoBlock[1]) && myRepRegExp2.test(monoBlock[1])) {
+								monoBlock[1] = monoBlock[1].replace(myRepRegExp, '');
+								monoBlock[1] = monoBlock[1].replace(myRepRegExp2, '');
+								strippedPreserveBBCodesWraps.push(preserveBBCodes[ii]);
+							}
+							
+						}
+					}
+					restoreHtml5Doctype = false, startsWithHtmlTag = false, endsWithHtmlTag = false;
+					if (monoBlock[1].indexOf('<!DOCTYPE html>') > -1) {restoreHtml5Doctype = true;}
+					if (monoBlock[1].substring(0, 6) == '<html>') {startsWithHtmlTag = true;}
+					if (monoBlock[1].substr(- '</html>'.length) === '</html>') {endsWithHtmlTag = true;}
+					//console.log(monoBlock[1]);
+					monoBlock[1] = DOMPurify.sanitize(monoBlock[1], {SAFE_FOR_JQUERY: true, WHOLE_DOCUMENT: true, ADD_TAGS: ['link', 'script']});
+					//console.log(monoBlock[1]);
+					if (restoreHtml5Doctype === true) {monoBlock[1] = '<!DOCTYPE html>\n' + monoBlock[1];}
+					if (startsWithHtmlTag === false) {monoBlock[1] = monoBlock[1].replace(/^(<html>\r?\n?\t?<head><\/head><body>\r?\n?\t?\s?)/, '');}
+					if (endsWithHtmlTag === false) {monoBlock[1] = monoBlock[1].replace(/(\r?\n?\t?<\/body>\r?\n?\t?<\/html>)$/, '');}
+					monoBlock[1] = monoBlock[1].replace('<html><head>', '<html>\n\t<head>');
+					monoBlock[1] = monoBlock[1].replace('\t\n</body></html>', '\t</body>\n</html>');
+					//console.log(monoBlock[1]);
+					if (strippedBBCodeTagNameWrap === true) {monoBlock[1] = '[' + bbCodeTagName + ']' + monoBlock[1] + '[/' + bbCodeTagName + ']';}
+					if (strippedPreserveBBCodesWraps.length > 0) {
+						for (ii = 0; ii < strippedPreserveBBCodesWraps.length; ii += 1) {
+							monoBlock[1] = '[' + strippedPreserveBBCodesWraps[ii] + ']' + monoBlock[1] + '[/' + strippedPreserveBBCodesWraps[ii] + ']';
+						}
+					}
+					//processedMonoBlock = XBBCODE.process({text: monoBlock[1], removeMisalignedTags: false, addInLineBreaks: true});
+					//console.log(processedMonoBlock.html);
+					postBody = postBody.replace('{temp-bbcode-replacement-placeholder}', monoBlock[1]);
+				}
+			}
+		}
+		if (preserveBBCodes.length < 1) {
+			myRegExp = new RegExp("(?:^|\\[\\/" + bbCodeTagName + "\\])((?!\\[" + bbCodeTagName + "\\]|\\[\\/" + bbCodeTagName + "\\])[^]*?|)(?:\\[" + bbCodeTagName + "\\]|$)", "i");
+			myQtyRegExp = new RegExp("(?:^|\\[\\/" + bbCodeTagName + "\\])((?!\\[" + bbCodeTagName + "\\]|\\[\\/" + bbCodeTagName + "\\])[^]*?|)(?:\\[" + bbCodeTagName + "\\]|$)", "ig");
+		} else {
+			preserveBBCodesRegExString1 = '', preserveBBCodesRegExString2 = '', preserveBBCodesRegExString3 = '';
+			for (i = 0; i < preserveBBCodes.length; i += 1) {
+				preserveBBCodesRegExString1 = "|\\[\\/" + preserveBBCodes[i] + "\\]";
+				preserveBBCodesRegExString2 = "|(?!\\[" + preserveBBCodes[i] + "\\]|\\[\\/" + preserveBBCodes[i] + "\\])[^]*?";
+				preserveBBCodesRegExString3 = "|\\[" + preserveBBCodes[i] + "\\]";
+			}
+			myRegExp = new RegExp("(?:^|\\[\\/" + bbCodeTagName + "\\]" + preserveBBCodesRegExString1 + ")((?!\\[" + bbCodeTagName + "\\]|\\[\\/" + bbCodeTagName + "\\])[^]*?" + preserveBBCodesRegExString2 + "|)(?:\\[" + bbCodeTagName + "\\]" + preserveBBCodesRegExString3 + "|$)", "i");
+			myQtyRegExp = new RegExp("(?:^|\\[\\/" + bbCodeTagName + "\\]" + preserveBBCodesRegExString1 + ")((?!\\[" + bbCodeTagName + "\\]|\\[\\/" + bbCodeTagName + "\\])[^]*?" + preserveBBCodesRegExString2 + "|)(?:\\[" + bbCodeTagName + "\\]" + preserveBBCodesRegExString3 + "|$)", "ig");
+		}
+		//myRegExp = /(?:^|\[\/mono\])((?!\[mono\]|\[\/mono\])[^]*?|)(?:\[mono\]|$)/i;
+		//myQtyRegExp = /(?:^|\[\/mono\])((?!\[mono\]|\[\/mono\])[^]*?|)(?:\[mono\]|$)/ig;
+		//myRegExp = /(?:^|\[\/mono\]|\[\/code\])((?!\[mono\]|\[\/mono\])[^]*?|(?!\[code\]|\[\/code\])[^]*?|)(?:\[mono\]|\[code\]|$)/i;
+		//myQtyRegExp = /(?:^|\[\/mono\]|\[\/code\])((?!\[mono\]|\[\/mono\])[^]*?|(?!\[code\]|\[\/code\])[^]*?|)(?:\[mono\]|\[code\]|$)/ig;
+		nonMonoBlockQty = postBody.match(myQtyRegExp);
+		if (nonMonoBlockQty !== null && nonMonoBlockQty.length > 0) {
+			for (i = 0; i < nonMonoBlockQty.length; i += 1) {
+				nonMonoBlock = postBody.match(myRegExp);
+				//console.log(nonMonoBlock);
+				//console.log(nonMonoBlockQty);
+				if (nonMonoBlock !== null && nonMonoBlock.length > 1) {
+					postBody = postBody.replace(nonMonoBlock[1], '{temp-bbcode-replacement-placeholder}');
+					nonMonoBlock[1] = DOMPurify.sanitize(nonMonoBlock[1], {SAFE_FOR_JQUERY: true});
+					postBody = postBody.replace('{temp-bbcode-replacement-placeholder}', nonMonoBlock[1]);
+				}
+			}
+		}//console.log(postBody);
+		return postBody;
+	};
 	improvedPT.threadShow = function () {
 		chrome.runtime.sendMessage({
 			set: "show"
@@ -594,7 +715,9 @@ var improvedPT = {};
 					$('button[data-bind*="click: onPreview"]').after($('button[data-bind*="click: onPreview"]').clone().removeAttr('data-bind').removeAttr('disabled').attr('type', 'button').attr('id', 'previewReplyBtn')).hide();
 				}
 				$(document).off('click', '#postReplyBtn').on("click", '#postReplyBtn', function(e) {
-					var errorHTML;
+					var myRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/i,
+						myQtyRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/ig,
+						errorHTML, isMonoBlock, isCodeBlock, monoBlock, processedMonoBlock, monoBlockQty, i, postBody, restoreHtml5Doctype, nonMonoBlock, processedNonMonoBlock, nonMonoBlockQty, startsWithHtmlTag, endsWithHtmlTag;
 					e.preventDefault;
 					$(this).val("Posting...").attr('disabled', 'disabled');
 					$("#errorExplanation").remove();
@@ -617,7 +740,10 @@ var improvedPT = {};
 						$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 						return false;
 					}
-					$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/posts", {"Body": DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true}), "ThreadId": DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true})}, function() {
+					postBody = $("#new_post textarea").val();
+					postBody = improvedPT.enableBBCodeMonoCodeSupport(postBody, 'mono', []);
+					postBody = improvedPT.enableBBCodeMonoCodeSupport(postBody, 'code', ['mono']);
+					$.post("https://www.phantasytour.com" + improvedPT.getBandApiUrlByWebUrl(improvedPT.bands, "/" + DOMPurify.sanitize(location.pathname.split('/')[1], {SAFE_FOR_JQUERY: true}) + "/" + DOMPurify.sanitize(location.pathname.split('/')[2], {SAFE_FOR_JQUERY: true})) + "/posts", {"Body": postBody, "ThreadId": DOMPurify.sanitize(location.pathname.split('/')[4], {SAFE_FOR_JQUERY: true})}, function() {
 						improvedPT.mt = true;
 						$("#new_post textarea").val("");
 						$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
@@ -625,7 +751,7 @@ var improvedPT = {};
 					});
 				});
 				$(document).off('click', '#previewReplyBtn').on("click", '#previewReplyBtn', function(e) {
-					var errorHTML, message, messageBody;
+					var errorHTML, message, messageBody, postBody;
 					e.preventDefault;
 					$(this).val("Previewing...").attr('disabled', 'disabled');
 					$("#errorExplanation").remove();
@@ -648,8 +774,12 @@ var improvedPT = {};
 						$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 						return false;
 					}
-					message = DOMPurify.sanitize($("#new_post textarea").val(), {SAFE_FOR_JQUERY: true});
-					messageBody = XBBCODE.process({text: message, removeMisalignedTags: false, addInLineBreaks: true});
+					postBody = $("#new_post textarea").val();
+					postBody = improvedPT.enableBBCodeMonoCodeSupport(postBody, 'mono', []);
+					postBody = improvedPT.enableBBCodeMonoCodeSupport(postBody, 'code', ['mono']);
+					//message = DOMPurify.sanitize(postBody, {SAFE_FOR_JQUERY: true, ADD_TAGS: ['link', 'script']});
+					//console.log(postBody);
+					messageBody = XBBCODE.process({text: postBody, removeMisalignedTags: false, addInLineBreaks: true});
 					BootstrapDialog.show({
 						title: 'Your thoughts...',
 						message: messageBody.html,
@@ -674,26 +804,23 @@ var improvedPT = {};
 			if (improvedPT.sfwSet === "true") {
 				$('body').attr('style', function(i, s) { return (s||'') + 'background: #fff !important;'; });
 				$('#main').css('background', '#fff');
-				$('#branding').css('display', 'none');
-				$('.col1 .yuimenu a').attr('style', function(i, s) { return (s||'') + 'color: #337ab7 !important;'; });
 				$('.col1_container').attr('style', function(i, s) { return (s||'') + 'background: #fafafa !important;'; });
 				$('.col1_container').attr('style', function(i, s) { return (s||'') + 'border: 1px solid #ccc !important;'; });
-				$('.post_listing .topic_header').css('color', '#444');
+				$('.post_listing .topic_header').css('color', '#404040');
 				$('.post_listing .topic_header').attr('style', function(i, s) { return (s||'') + 'background: #fff !important;'; });
 				$('.post_listing .topic_header').attr('style', function(i, s) { return (s||'') + 'border: 1px solid #ccc !important;'; });
 				$('.post_listing .topic_header .mod_tools a').css('color', '#337ab7');
-				$('.btn-success').css({"color": "#444", "background-color": "#f0f0f0", "border-color": "#ccc"});
+				$('.btn-success').css({"color": "#404040", "background-color": "#f0f0f0", "border-color": "#ccc"});
 				$('.post_listing .post .post_header span.poster_name a').css('color', '#337ab7');
-				$('.rbroundbox h4').css('color', '#444');
-				$('#pt_menubar_top_container').css({"height": "50px", "background": "#0c0c0c", "position": "relative", "z-index": "29"});
-				$('#pt_menubar_top').css({"z-index": "0", "position": "relative", "display": "block", "visibility": "visible"});
-				$('#pt_menubar_top').prepend('<a href="/" id="logo" class="nav__logo"></a>');
-				$('.nav__logo').css({"background-image": "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFUAAABVCAMAAAAPK1hoAAAATlBMVEXLAADOEBD////YQED87+/SICD88PDfYGDVMDDywMDsoKDyv7/bUFD10ND439/lgIDokJD54ODicHDvsLD1z8/rn5/vr6/oj4/bT0/eX18SZPv4AAACRUlEQVR4Ae3W227jLBRA4c3i7LPjHNr3f9FfDCll9NuOpbll3WUjfSEuIZVWq9VqtVqt1k7KLzE6gDm9vI2wDfX6POI2XV4DSAROTL2Ry6oaIdUpeWfX9+S6qpJZq5F3m7wbobDX1MEBtRoApt7kt0h5gHsPMFxTPSnz+CofdwaeIsGAs5LqgPk9UVfUgdRLKd/FP3nZAH1zwZdnEAG1ODUn/YJqHWC0WhzlCcSkzkTpAf1Wk9HJBNjPakxoCCulojIEYKxU9ADEj6oGCMGxp66qA26VOpbtn6oxMSqh9F9lmNW0kv88RcVbYP2gWsCoDjBeSkV19gYslerUAszn6g1YEk1Ba5VNJiAUtWz/VN2AkOhedlW0BmKlYj3Qnarjz9pwoI7yTKuVGuUO6DMVuMsKyIHKzQJrefey/Q9qFM7U/H2iUlfpgA/qKNOhugGLMpWxALM15+r9/LnqCQi+MpQp279wBuKOWk5AXxn5BEz8w3nVCWTQtXEH9HCqJtCpDnB+V7W8r4NilO0fq2k1f10gDpJTK0WVch0UowN8uHJnGeqo1AQ6O1eGTRO1HKllsy6E6UgVn6+DYpTtn6nWJFarl6GO8KPmG1XXxgTY24XfrUWp70f/21Pij6qBUR7m1xjydXCX9dNvrOsGJVUzQJ50+Y4NFKMHfNYnOWgw7NfndWWAMVb/ddgyoZOj1JPddHVQcqH+fClj5Ti94xr/v0+TJxVrgpymvl99bwp571+2Xn1NmEc9sY+J6a9Jq9VqtVqtVus/4SAa34bCihgAAAAASUVORK5CYII=')", "background-position": "0 0", "background-repeat": "no-repeat", "background-size": "60px", "display": "inline-block", "height": "60px", "position": "relative", "width": "60px", "z-index": "33"});
-				$('#pt_menubar_top div.bd').css({"position": "absolute", "top": "0", "left": "70px", "line-height": "50px", "display": "block", "width": "914px"});
-				$('#pt_menubar_top div.bd ul').css({"position": "absolute", "top": "0", "line-height": "50px", "display": "block", "width": "914px"});
-				$('#pt_menubar_top div.bd ul li').css({"line-height": "50px"});
-				$('#pt_menubar_top .yuimenubaritem').css({"font-size": "15px", "padding": "0"});
-				$('#pt_menubar_top div.bd ul li a').css({"border-right": "1px solid #595959", "font-weight": "300", "display": "inline-block", "line-height": "1", "margin": "0 .4em 0 0", "padding": "0 .3em 0 0", "letter-spacing": ".04em", "-moz-transition": "color .2s", "-o-transition": "color .2s", "-webkit-transition": "color .2s", "transition": "color .2s"});
+				$('.rbroundbox h4').css('color', '#404040');
+				$('#navbar').css({"height": "50px", "background": "#0c0c0c"});
+				$('.navbar-brand > img').css('display', 'none');
+				$('.navbar-brand').css({"background-image": "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFUAAABVCAMAAAAPK1hoAAAATlBMVEXLAADOEBD////YQED87+/SICD88PDfYGDVMDDywMDsoKDyv7/bUFD10ND439/lgIDokJD54ODicHDvsLD1z8/rn5/vr6/oj4/bT0/eX18SZPv4AAACRUlEQVR4Ae3W227jLBRA4c3i7LPjHNr3f9FfDCll9NuOpbll3WUjfSEuIZVWq9VqtVqt1k7KLzE6gDm9vI2wDfX6POI2XV4DSAROTL2Ry6oaIdUpeWfX9+S6qpJZq5F3m7wbobDX1MEBtRoApt7kt0h5gHsPMFxTPSnz+CofdwaeIsGAs5LqgPk9UVfUgdRLKd/FP3nZAH1zwZdnEAG1ODUn/YJqHWC0WhzlCcSkzkTpAf1Wk9HJBNjPakxoCCulojIEYKxU9ADEj6oGCMGxp66qA26VOpbtn6oxMSqh9F9lmNW0kv88RcVbYP2gWsCoDjBeSkV19gYslerUAszn6g1YEk1Ba5VNJiAUtWz/VN2AkOhedlW0BmKlYj3Qnarjz9pwoI7yTKuVGuUO6DMVuMsKyIHKzQJrefey/Q9qFM7U/H2iUlfpgA/qKNOhugGLMpWxALM15+r9/LnqCQi+MpQp279wBuKOWk5AXxn5BEz8w3nVCWTQtXEH9HCqJtCpDnB+V7W8r4NilO0fq2k1f10gDpJTK0WVch0UowN8uHJnGeqo1AQ6O1eGTRO1HKllsy6E6UgVn6+DYpTtn6nWJFarl6GO8KPmG1XXxgTY24XfrUWp70f/21Pij6qBUR7m1xjydXCX9dNvrOsGJVUzQJ50+Y4NFKMHfNYnOWgw7NfndWWAMVb/ddgyoZOj1JPddHVQcqH+fClj5Ti94xr/v0+TJxVrgpymvl99bwp571+2Xn1NmEc9sY+J6a9Jq9VqtVqtVus/4SAa34bCihgAAAAASUVORK5CYII=')", "background-position": "0 0", "background-repeat": "no-repeat", "background-size": "60px", "display": "inline-block", "height": "60px", "position": "relative", "width": "60px", "z-index": "33"});
+				$('#bs-example-navbar-collapse-1 ul.nav.navbar-nav').css('margin', '0 0 0 10px');
+				$('#bs-example-navbar-collapse-1 ul.nav.navbar-nav > li').css('line-height', '50px');
+				$('#bs-example-navbar-collapse-1 ul.nav.navbar-nav > li > a').css({"border-right": "1px solid #595959", "font-weight": "300", "line-height": "1", "margin": "0 .4em 0 0", "padding": "0 .3em 0 0", "letter-spacing": ".04em", "display": "inline-block"});
+				$('#bs-example-navbar-collapse-1 ul.nav.navbar-nav.navbar-right').css('margin', '0 -15px 0 0');
+				$('.side-menu ul li a').css('color', '#337ab7');
 				$(".post:not(:hidden):even").removeClass("odd");
 				$(".post:not(:hidden):odd").removeClass("even");
 			}
@@ -744,6 +871,35 @@ var improvedPT = {};
 					}
 				}, 1000);
 			}
+			/* replace [mono][/mono] tags */
+			$('.post_body_container').each(function () {
+				var postBody = $(this).html(),
+					myRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/i,
+					myQtyRegExp = /(?:[^]*?)(\[mono\](?!\[mono\])[^]*?\[\/mono\]|\[code\](?!\[code\])[^]*?\[\/code\])(?:[^]*?)/ig,
+				monoBlock, processedMonoBlock, monoBlockQty, i;
+				monoBlockQty = postBody.match(myQtyRegExp);
+				if (monoBlockQty !== null && monoBlockQty.length > 0) {
+					for (i = 0; i < monoBlockQty.length; i += 1) {
+						monoBlock = postBody.match(myRegExp);
+						//console.log(monoBlock);
+						//console.log(monoBlockQty);
+						if (monoBlock !== null && monoBlock.length > 1 && monoBlock[1].replace(/\s\r\n/g, '') !== '[mono][/mono]' && monoBlock[1].replace(/\s\r\n/g, '') !== '[code][/code]') {
+							postBody = postBody.replace(monoBlock[1], '{temp-bbcode-replacement-placeholder}');
+							processedMonoBlock = XBBCODE.process({text: monoBlock[1], removeMisalignedTags: false, addInLineBreaks: true});
+							//console.log(processedMonoBlock.html);
+							postBody = postBody.replace('{temp-bbcode-replacement-placeholder}', processedMonoBlock.html.replace(/&lt;br\s*[\/]?&gt;/gi, '\n'));
+							$(this).html(postBody);
+						}
+					}
+				}
+				$('.post_body_container').find('span.xbbcode-code').each(function (i) {
+					if ($(this).text() === '') {
+						$(this).before('[code][/code]');
+						$(this).remove();
+					}
+				});
+			});
+
 		});
 	};
 	improvedPT.overrideMTBtns = function () {
@@ -879,6 +1035,7 @@ var improvedPT = {};
 		});
 	};
 	$(document).ready(function () {
+		$(document).off('.data-api');
 		improvedPT.getBands();
 	});
 	$(document).on('unload', function () {
