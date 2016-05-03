@@ -1,3 +1,7 @@
+2.0.0.101
+bug fix: make mutation handlers run after page switched
+
+
 2.0.2.7
 update options page style
 

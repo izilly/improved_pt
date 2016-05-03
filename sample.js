@@ -361,7 +361,8 @@ var improvedPT = {};
 
 			document.addEventListener('pt-thread-posts-loaded', function () {
 				console.log('*** posts-loaded: heard ***');
-				if (!improvedPT.posts_loaded_done) {
+				if (!improvedPT.posts_loaded_done || document.location.href !== improvedPT.currentURL) {
+					improvedPT.currentURL = document.location.href;
 					console.log('*** posts-loaded: running ***');
 					improvedPT.checkMT();
 					improvedPT.addOptionsLink();

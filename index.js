@@ -39,11 +39,12 @@ var improvedPT = {};
 							element = elements[i];
 							// Make sure the callback isn't invoked with the
 							// same element more than once
-							if(!element.ready){
-									element.ready = true;
-									// Invoke the callback with the element
-									fn.call(element, element);
-							}
+							//if(!element.ready){
+									//element.ready = true;
+									//// Invoke the callback with the element
+									//fn.call(element, element);
+							//}
+							fn.call(element, element);
 					}
 			}
 			// Expose `ready`
@@ -126,27 +127,62 @@ var improvedPT = {};
 	};
 	improvedPT.main = function () {
 		document.addEventListener('pt-threads-loaded', function () {
-			console.log('*** threads-loaded: heard ***');
-			if (!improvedPT.threads_loaded_done) {
-				console.log('*** threads-loaded: running ***');
-				improvedPT.aprilFools();
-				improvedPT.alterThreadList();
-				improvedPT.showIndex();
-				improvedPT.addOptionsLink();
-				// prevent handler from running more than once.
-				improvedPT.threads_loaded_done = true;
-			}
+			console.log('*** threads-loaded: running ***');
+			improvedPT.aprilFools();
+			improvedPT.alterThreadList();
+			improvedPT.showIndex();
+			improvedPT.addOptionsLink();
 		});
 		// observe mutations on querySelector that matches threads in threadlist
 		improvedPT.ready("#threads_table > tbody > tr:last-child",
+				function(element) {
+					improvedPT.onThreadsLoaded(element);
+				}
+		);
+		// also observe the text below threadlist that numbers the threads:
+		// e.g., 'Displaying posts 1 - 40 of 3000'
+		improvedPT.ready("div.paginationInfo",
 				function(element){
-					console.log('*** threads-loaded: dispatching event ***');
-					var event = document.createEvent('Event');
-					event.initEvent('pt-threads-loaded', true, true);
-					document.dispatchEvent(event);
+					improvedPT.onPaginationChange(element);
 				}
 		);
 	};
+
+	improvedPT.getPageText = function(element) {
+		var paginationDiv = element;
+		if (!paginationDiv) {
+			var paginationDivList = document.querySelectorAll('div.paginationInfo');
+			if (paginationDivList) {
+				paginationDiv = paginationDivList[0];
+			}
+		}
+		return paginationDiv.textContent;
+	};
+
+	improvedPT.onThreadsLoaded = function(element) {
+		if (!improvedPT.threads_loaded_done) {
+			improvedPT.threads_loaded_done = true;
+			improvedPT.pageText = improvedPT.getPageText();
+			console.log('*** threads-loaded: dispatching event ***');
+			improvedPT.threadsLoadedRun();
+		}
+	};
+
+	improvedPT.onPaginationChange = function(element) {
+		var pageText = element.textContent;
+		if (pageText != improvedPT.pageText) {
+			improvedPT.pageText = pageText;
+			console.log('*** page-changed: dispatching event ***');
+			improvedPT.threadsLoadedRun();
+		}
+	};
+
+	improvedPT.threadsLoadedRun = function() {
+		var event = document.createEvent('Event');
+		event.initEvent('pt-threads-loaded', true, true);
+		document.dispatchEvent(event);
+	};
+
 	$(document).ready(function () {
 		improvedPT.main();
 	});
