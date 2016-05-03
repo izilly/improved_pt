@@ -1038,9 +1038,6 @@ var improvedPT = {};
 		$(document).off('.data-api');
 		improvedPT.getBands();
 	});
-	$(document).on('unload', function () {
-		if(typeof detectPTPostLoad !== 'undefined') {detectPTPostLoad.disconnect();}
-	});
 	$(document).on("mousedown", "img", function () {
 		improvedPT.lastele = $(this);
 	});
