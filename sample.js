@@ -360,39 +360,46 @@ var improvedPT = {};
 			improvedPT.addTheadStats();
 
 			document.addEventListener('pt-thread-posts-loaded', function () {
-				console.log('*** posts-loaded: heard ***');
-				if (!improvedPT.posts_loaded_done || document.location.href !== improvedPT.currentURL) {
-					improvedPT.currentURL = document.location.href;
-					console.log('*** posts-loaded: running ***');
-					improvedPT.checkMT();
-					improvedPT.addOptionsLink();
-					improvedPT.addScrollDown();
-					improvedPT.addBumpThread();
-					improvedPT.addPrintThread();
-					improvedPT.addBoldText();
-					improvedPT.addItalicText();
-					improvedPT.addBoldItalicText();
-					improvedPT.addLinkBuilder();
-					improvedPT.enableQuoteOverride();
-					improvedPT.replaceLinks();
-					improvedPT.threadShow();
-					improvedPT.overrideMTBtns();
-					// prevent handler from running more than once.
-					improvedPT.posts_loaded_done = true;
-				}
-			});
-			// observe mutations on querySelector that matches posts
-			improvedPT.ready("#applicationHost div > div > div.post:last-child",
-					function(element){
-						console.log('*** posts-loaded: dispatching event ***');
-						var event = document.createEvent('Event');
-						event.initEvent('pt-thread-posts-loaded', true, true);
-						document.dispatchEvent(event);
-					}
-			);
+				console.log('*** posts-loaded: running ***');
+				improvedPT.checkMT();
+				improvedPT.addOptionsLink();
+				improvedPT.addScrollDown();
+				improvedPT.addBumpThread();
+				improvedPT.addPrintThread();
+				improvedPT.addBoldText();
+				improvedPT.addItalicText();
+				improvedPT.addBoldItalicText();
+				improvedPT.addLinkBuilder();
+				improvedPT.enableQuoteOverride();
+				improvedPT.replaceLinks();
+				improvedPT.threadShow();
+				improvedPT.overrideMTBtns();
 		});
+		// observe mutations on querySelector that matches posts
+		improvedPT.ready("#applicationHost div > div > div.post:last-child",
+				function(element){
+					improvedPT.onPostsLoaded(element);
+				}
+		);
+	});
 		improvedPT.addMessageListener();
 	};
+
+	improvedPT.onPostsLoaded = function(element) {
+		if (!improvedPT.posts_loaded_done || document.location.href !== improvedPT.currentURL) {
+			improvedPT.sendLoadedEvent();
+			improvedPT.posts_loaded_done = true;
+			improvedPT.currentURL = document.location.href;
+		}
+	};
+
+	improvedPT.sendLoadedEvent = function(){
+		console.log('*** posts-loaded: dispatching event ***');
+		var event = document.createEvent('Event');
+		event.initEvent('pt-thread-posts-loaded', true, true);
+		document.dispatchEvent(event);
+	};
+
 	improvedPT.replaceLinks = function () {
 		var temp = true;
 		/*$.post("http://"+wnindow.location.host + window.location.pathname, {authenticity_token: $('input[name*="authenticity_token"]').val(), post_body:"testing123",post_topic_id: topic,commit: "Post Reply"}, function(data) {
@@ -749,6 +756,7 @@ var improvedPT = {};
 						$("#new_post textarea").val("");
 						$('#postReplyBtn').val("Post Reply").removeAttr("disabled");
 						improvedPT.afterAjax();
+						improvedPT.posts_loaded_done = false;
 					});
 				});
 				$(document).off('click', '#previewReplyBtn').on("click", '#previewReplyBtn', function(e) {

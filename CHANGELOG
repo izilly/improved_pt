@@ -1,3 +1,6 @@
+2.0.0.103
+run posts-loaded handler after dynamic post/load
+
 2.0.0.102
 bug fix: prevent mutation handlers running more than once per load/page-change
 
