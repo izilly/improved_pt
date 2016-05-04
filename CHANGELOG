@@ -1,3 +1,6 @@
+2.0.0.102
+bug fix: prevent mutation handlers running more than once per load/page-change
+
 2.0.0.101
 bug fix: make mutation handlers run after page switched
 

@@ -171,9 +171,12 @@ var improvedPT = {};
 	improvedPT.onPaginationChange = function(element) {
 		var pageText = element.textContent;
 		if (pageText != improvedPT.pageText) {
+			var oldText = improvedPT.pageText;
 			improvedPT.pageText = pageText;
-			console.log('*** page-changed: dispatching event ***');
-			improvedPT.threadsLoadedRun();
+			if (oldText) {
+				console.log('*** page-changed: dispatching event ***');
+				improvedPT.threadsLoadedRun();
+			}
 		}
 	};
 
